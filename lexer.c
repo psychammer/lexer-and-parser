@@ -4,6 +4,11 @@
 #include <ctype.h>
 #include "token.h"
 #include "lexer.h"
+#include "parser.h"
+#include "AST.h"
+
+
+void print_ast_prefix(AST_T* node);
 
 char* getContent(char* filePath);
 char* getTokenType(int tokenTypeInt);
@@ -32,22 +37,25 @@ int main(int argc, char *argv[]){
 
     int size = 0;
     token* token_arr = malloc(sizeof(token));
-    while(myLexer->current_char!=EOF && myLexer->i < strlen(myLexer->content)){
-        token* token_instance = token_buffer(myLexer);
+    // while(myLexer->current_char!=EOF && myLexer->i < strlen(myLexer->content)){
+        parser_T* parser = init_parser(myLexer);
+        AST_T* root = parser_parse(parser);
+        print_ast_prefix(root);
+        // token* token_instance = token_buffer(myLexer);        
 
-        if(token_instance->value != NULL){
-            size++;
+        // if(token_instance->value != NULL){
+        //     size++;
 
-            // Resize token array
-            token* temp = realloc(token_arr, size * sizeof(token));
-            token_arr = temp;
+        //     // Resize token array
+        //     token* temp = realloc(token_arr, size * sizeof(token));
+        //     token_arr = temp;
 
-            // Copy token instance data
-            token_arr[size - 1].type = token_instance->type;
-            token_arr[size - 1].value = strdup(token_instance->value);
-        }
+        //     // Copy token instance data
+        //     token_arr[size - 1].type = token_instance->type;
+        //     token_arr[size - 1].value = strdup(token_instance->value);
+        // }
         
-    }
+    // }
 
     // printf("size of token: %d", size);
 
@@ -106,6 +114,8 @@ int main(int argc, char *argv[]){
         case 39: return "TOKEN_SINGLECOMMENT";break;
         case 40: return "TOKEN_MULTICOMMENT";break;
         case 41: return "TOKEN_NUMBER";break;
+        case TOKEN_CONST: return "TOKEN_CONST"; break;
+        case TOKEN_BLANK: return "TOKEN_BLANK"; break;
         default: return "UNKNOWN_TOKEN";break;
     }
 }
@@ -138,4 +148,44 @@ char* getContent(char* filePath){
     }
 
     return content;
+}
+
+void print_ast_prefix(AST_T* node) {
+    if (node == NULL) {
+        return;
+    }
+
+    switch (node->type) {
+        case AST_EXPRESSION:
+            printf("%s ", node->as_operator); // Operator first
+            print_ast_prefix(node->first_term);
+            printf(" "); // Space between operands
+            print_ast_prefix(node->second_term);
+            break;
+        case AST_TERM:
+            printf("%s ", node->md_operator); // Operator first
+            print_ast_prefix(node->first_factor);
+            printf(" "); // Space between operands
+            print_ast_prefix(node->second_factor);
+            break;
+        case AST_FACTOR:
+            printf("%f", node->number);
+            break;
+        case AST_COMPOUND:
+            printf("{ ");
+            for (size_t i = 0; i < node->compound_size; i++) {
+                print_ast_prefix(node->compound_value[i]);
+                if (i < node->compound_size - 1) {
+                    printf(", ");
+                }
+            }
+            printf(" }");
+            break;
+        case AST_NOOP:
+            printf("NOOP");
+            break;
+        default:
+            printf("UNKNOWN");
+            break;
+    }
 }

@@ -1,2 +1,0 @@
-TOKEN_ID, ca
-TOKEN_ID, ca_se

@@ -54,7 +54,21 @@ typedef struct token_struct{
 
         TOKEN_NUMBER,
 
-        TOKEN_UNKNOWN
+        TOKEN_UNKNOWN,
+
+        TOKEN_CHECK,
+        TOKEN_ELIF,
+        TOKEN_ENDLOOP,
+        TOKEN_FUNCTION,
+        TOKEN_LOOP,
+        TOKEN_OTHERWISE,
+        TOKEN_PRINTOUT,
+        TOKEN_SWITCH,
+        TOKEN_TERMINATE,
+        TOKEN_TERMINATEALL,
+        TOKEN_CONST,
+        TOKEN_BLANK,
+
 
     }type;
 
