@@ -6,9 +6,10 @@
 #include "lexer.h"
 #include "parser.h"
 #include "AST.h"
+#include "visitor.h"
 
 
-void print_ast_prefix(AST_T* node);
+void print_ast_prefix(AST_T* node, visitor_T* visitor);
 
 char* getContent(char* filePath);
 char* getTokenType(int tokenTypeInt);
@@ -38,9 +39,15 @@ int main(int argc, char *argv[]){
     int size = 0;
     token* token_arr = malloc(sizeof(token));
     // while(myLexer->current_char!=EOF && myLexer->i < strlen(myLexer->content)){
-        parser_T* parser = init_parser(myLexer);
-        AST_T* root = parser_parse(parser);
-        print_ast_prefix(root);
+    parser_T* parser = init_parser(myLexer);
+    AST_T* root = parser_parse(parser, parser->scope);
+    // print_ast_prefix(root);
+    visitor_T* visitor = init_visitor(argv[2]);
+    visitor_visit(visitor, root);
+
+    fclose(visitor->filename);
+
+        // print_ast_prefix(root);
         // token* token_instance = token_buffer(myLexer);        
 
         // if(token_instance->value != NULL){
@@ -59,18 +66,18 @@ int main(int argc, char *argv[]){
 
     // printf("size of token: %d", size);
 
-    FILE *file = fopen(argv[2], "w");
-    if (file == NULL) {
-        perror("Error opening file");
-        return 1;
-    }
+    // FILE *file = fopen(argv[2], "w");
+    // if (file == NULL) {
+    //     perror("Error opening file");
+    //     return 1;
+    // }
 
 
-    for(int i = 0; i < size; i++) {
-        fprintf(file, "%s, %s\n", getTokenType(token_arr[i].type), token_arr[i].value);
-    }
+    // for(int i = 0; i < size; i++) {
+    //     fprintf(file, "%s, %s\n", getTokenType(token_arr[i].type), token_arr[i].value);
+    // }
 
-    fclose(file);
+    // fclose(file);
     
     
     return 0;
@@ -148,44 +155,4 @@ char* getContent(char* filePath){
     }
 
     return content;
-}
-
-void print_ast_prefix(AST_T* node) {
-    if (node == NULL) {
-        return;
-    }
-
-    switch (node->type) {
-        case AST_EXPRESSION:
-            printf("%s ", node->as_operator); // Operator first
-            print_ast_prefix(node->first_term);
-            printf(" "); // Space between operands
-            print_ast_prefix(node->second_term);
-            break;
-        case AST_TERM:
-            printf("%s ", node->md_operator); // Operator first
-            print_ast_prefix(node->first_factor);
-            printf(" "); // Space between operands
-            print_ast_prefix(node->second_factor);
-            break;
-        case AST_FACTOR:
-            printf("%f", node->number);
-            break;
-        case AST_COMPOUND:
-            printf("{ ");
-            for (size_t i = 0; i < node->compound_size; i++) {
-                print_ast_prefix(node->compound_value[i]);
-                if (i < node->compound_size - 1) {
-                    printf(", ");
-                }
-            }
-            printf(" }");
-            break;
-        case AST_NOOP:
-            printf("NOOP");
-            break;
-        default:
-            printf("UNKNOWN");
-            break;
-    }
 }

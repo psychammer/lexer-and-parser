@@ -855,7 +855,7 @@ token* get_identifier_token(lexer* myLexer){
                     case 7: // check for fun'c'
                         if(myLexer->current_char=='c'){
                             realloc_token_value_then_advance(myToken, myLexer);
-                            state=8; // now check for func't'
+                            state=12; // now check for func't'
                             break;
                         }
                         else{

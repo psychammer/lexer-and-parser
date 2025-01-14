@@ -6,17 +6,22 @@ typedef struct AST_STRUCT
 {
     enum{
         AST_DECLARATION_ASSIGNMENT_STATEMENT,
+        AST_ASSIGNMENT,
         AST_DECLARATION,
         AST_VARIABLE_DEFINITION,
+        AST_FUNCTION_DEFINITION,
         AST_VARIABLE,
         AST_FUNCTION_CALL,
         AST_STRING,
         AST_EXPRESSION,
         AST_TERM,
+        AST_POWER,
         AST_FACTOR,
         AST_COMPOUND,
         AST_NOOP // NULL OPERATION
     }type;
+
+    struct SCOPE_STRUCT* scope;
 
     /* AST_DECLARATION_STATEMENT */
     int datatype;
@@ -27,6 +32,18 @@ typedef struct AST_STRUCT
     /* AST_DECLARATION_ASSIGNMENT_STATEMENT */
     char* declaration_assignment_statement_identifier; 
     struct AST_STRUCT* declaration_assignment_statement_value;
+
+    /* AST_ASSIGNMENT */
+    char* assignment_identifier;
+    struct AST_STRUCT* assignment_expression;
+
+    /* AST_FUNCTION_DEFINITION */
+    struct AST_STRUCT* function_definition_body;
+    char* function_definition_name;
+    char* function_definition_datatype;
+    struct AST_STRUCT** function_definition_args;
+    char* function_definition_arg_datatype;
+    size_t function_definition_args_size;
 
     /* AST_VARIABLE_DEFINITION*/
     char* variable_definition_variable_name; 
@@ -50,8 +67,13 @@ typedef struct AST_STRUCT
     struct AST_STRUCT* second_term;;
 
     /* AST_TERM */
-    struct AST_STRUCT* first_factor;
+    struct AST_STRUCT* first_power;
     char* as_operator;
+    struct AST_STRUCT* second_power;
+
+    /* AST_POWER */
+    struct AST_STRUCT* first_factor;
+    char* p_operator;
     struct AST_STRUCT* second_factor;
 
     /* AST_FACTOR */
@@ -101,6 +123,11 @@ AST_T* init_ast(int type)
     /* AST_COMPOUND */
     ast->compound_value = (void*)0;;
     ast->compound_size = 0; 
+
+
+    /* AST_ASSIGNMENT */
+    char* assignment_identifier;
+    struct AST_STRUCT* assignment_expression;
 
     return ast;
 
