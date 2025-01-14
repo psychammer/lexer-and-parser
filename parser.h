@@ -406,7 +406,7 @@ AST_T* parser_parse_function_definition(parser_T* parser, scope_T* scope)
     if(parser->current_token->type == TOKEN_FUNCTION){
         printf("here?");
         parser_eat(parser, TOKEN_FUNCTION);
-    }
+    } // TOKEN_FUNCTION
 
     char* function_name = parser->current_token->value;
     ast->function_definition_name = calloc(
@@ -414,7 +414,7 @@ AST_T* parser_parse_function_definition(parser_T* parser, scope_T* scope)
     );
     strcpy(ast->function_definition_name, function_name);
 
-    parser_eat(parser, TOKEN_ID); // function name
+    parser_eat(parser, TOKEN_ID); // function TOKEN_ID
 
     parser_eat(parser, TOKEN_LPAREN);
 
@@ -507,6 +507,11 @@ AST_T* parser_parse_id(parser_T* parser, scope_T* scope)
     {
         return parser_parse_variable(parser, scope);
     }
+}
+
+AST_T* parser_parse_declaration_stmt(parser_T* parser, scope_T* scope)
+{
+       
 }
 
 #endif
