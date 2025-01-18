@@ -19,6 +19,7 @@ typedef struct AST_STRUCT
         AST_FACTOR,
         AST_COMPOUND,
         AST_ITERATIVE,
+        AST_OUTPUT, //OUTPUT
         AST_NOOP // NULL OPERATION
     }type;
 
@@ -89,7 +90,12 @@ typedef struct AST_STRUCT
     struct AST_STRUCT* iterative_condition; 
     struct AST_STRUCT* iterative_body;      
     struct AST_STRUCT* for_init;           
-    struct AST_STRUCT* for_increment;       
+    struct AST_STRUCT* for_increment;    
+
+    /* AST_OUTPUT */
+    struct AST_STRUCT** output_expressions;  // Array of expressions to be output
+    size_t output_expressions_size;          // Number of expressions in the array
+
 } AST_T;
 
 
@@ -135,6 +141,25 @@ AST_T* init_ast(int type)
     /* AST_ASSIGNMENT */
     char* assignment_identifier;
     struct AST_STRUCT* assignment_expression;
+
+    AST_T* ast = calloc(1, sizeof(struct AST_STRUCT));
+    ast->type = type;
+
+    /* AST_OUTPUT */
+    ast->output_expressions = (void*)0;
+    ast->output_expressions_size = 0;
+
+    /* Special initialization for OUTPUT type */
+    if (type == AST_OUTPUT)
+    {
+        ast->output_expressions = calloc(1, sizeof(struct AST_STRUCT*));
+        ast->output_expressions_size = 0;
+    }
+    else if (type == AST_COMPOUND)
+    {
+        ast->compound_value = calloc(1, sizeof(struct AST_STRUCT*));
+        ast->compound_size = 0;
+    }
 
     return ast;
 
