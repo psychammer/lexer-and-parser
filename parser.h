@@ -209,6 +209,7 @@ AST_T* parser_parse_conditional_statement(parser_T* parser, scope_T* scope)
 
 }
 
+//<output-stmt>
 AST_T* parser_parse_output_statement(parser_T* parser, scope_T* scope)
 {
     // Initialize output statement AST node
@@ -223,7 +224,7 @@ AST_T* parser_parse_output_statement(parser_T* parser, scope_T* scope)
     
     // Initialize array to store expressions
     output_statement->output_expressions = calloc(1, sizeof(struct AST_STRUCT*));
-    output_statement->output_expressions_size = 0;
+    output_statement->output_expressions_size = 0;s
     
     // Parse first expression
     AST_T* expression = parser_parse_expression(parser, scope);
