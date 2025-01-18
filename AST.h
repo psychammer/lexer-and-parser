@@ -18,6 +18,7 @@ typedef struct AST_STRUCT
         AST_POWER,
         AST_FACTOR,
         AST_COMPOUND,
+        AST_ITERATIVE,
         AST_NOOP // NULL OPERATION
     }type;
 
@@ -83,6 +84,12 @@ typedef struct AST_STRUCT
     /* AST_COMPOUND */
     struct AST_STRUCT** compound_value;
     size_t compound_size; 
+
+    /* AST_ITERATIVE*/
+    struct AST_STRUCT* iterative_condition; 
+    struct AST_STRUCT* iterative_body;      
+    struct AST_STRUCT* for_init;           
+    struct AST_STRUCT* for_increment;       
 } AST_T;
 
 

@@ -266,6 +266,55 @@ AST_T* parser_parse_statements(parser_T* parser, scope_T* scope)
     return compound;
 }
 
+// <iterative-stmt>
+AST_T* parser_parse_iterative_stmt(parser_T* parser, scope_T* scope){
+    AST_T* iterative_stmt = init_ast(AST_ITERATIVE);
+
+    if (strcmp(parser->current_token->value, "while") == 0) {
+        // Parse while loop
+        parser_eat(parser, TOKEN_KEYWORD); // Consume while
+        parser_eat(parser, TOKEN_LPAREN); // Consume (
+
+        // Parse condition
+        iterative_stmt->iterative_condition = parser_parse_expression(parser, scope);
+
+        parser_eat(parser, TOKEN_RPAREN); // Consume )
+
+        // Parse loop bodyh
+        parser_eat(parser, TOKEN_LBRACE); // Consume {
+        iterative_stmt->iterative_body = parser_parse_statements(parser, scope);
+        parser_eat(parser, TOKEN_RBRACE); // Consume }
+    } else if (strcmp(parser->current_token->value, "for") == 0) {
+        // Parse for loop
+        parser_eat(parser, TOKEN_KEYWORD); // Consume for
+        parser_eat(parser, TOKEN_LPAREN); // Consume (
+
+        // Parse init
+        iterative_stmt->for_init = parser_parse_statement(parser, scope);
+        parser_eat(parser, TOKEN_SEMI); // Consume ;
+
+        // Parse condition
+        iterative_stmt->iterative_condition = parser_parse_expression(parser, scope);
+        parser_eat(parser, TOKEN_SEMI); // Consume ;
+
+        // Parse increment
+        iterative_stmt->for_increment = parser_parse_statement(parser, scope);
+        parser_eat(parser, TOKEN_RPAREN); // Consume )
+
+        // Parse loop body
+        parser_eat(parser, TOKEN_LBRACE); // Consume {
+        iterative_stmt->iterative_body = parser_parse_statements(parser, scope);
+        parser_eat(parser, TOKEN_RBRACE); // Consume }
+        
+    } else {
+        printf("Unexpected token in iterative statement: '%s'\n", parser->current_token->value);
+        return init_ast(AST_NOOP);
+    }
+
+    iterative_stmt->scope = scope;
+
+    return iterative_stmt;
+}
 
 AST_T* parser_parse_factor(parser_T* parser, scope_T* scope) {
     AST_T* node = init_ast(AST_FACTOR);
