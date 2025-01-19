@@ -20,6 +20,7 @@ typedef struct AST_STRUCT
         AST_COMPOUND,
         AST_ITERATIVE,
         AST_OUTPUT, //OUTPUT
+        AST_INPUT, //INPUT
         AST_NOOP // NULL OPERATION
     }type;
 
@@ -62,11 +63,10 @@ typedef struct AST_STRUCT
     /* AST_STRING */
     char* string_value;
 
-
     /* AST_EXPRESSION */
     struct AST_STRUCT* first_term;
     char* md_operator; 
-    struct AST_STRUCT* second_term;;
+    struct AST_STRUCT* second_term;
 
     /* AST_TERM */
     struct AST_STRUCT* first_power;
@@ -84,24 +84,22 @@ typedef struct AST_STRUCT
 
     /* AST_COMPOUND */
     struct AST_STRUCT** compound_value;
-    size_t compound_size; 
+    size_t compound_size;
 
-    /* AST_ITERATIVE*/
-    struct AST_STRUCT* iterative_condition; 
-    struct AST_STRUCT* iterative_body;      
-    struct AST_STRUCT* for_init;           
-    struct AST_STRUCT* for_increment;    
+    /* AST_ITERATIVE */
+    struct AST_STRUCT* iterative_condition;
+    struct AST_STRUCT* iterative_body;
+    struct AST_STRUCT* for_init;
+    struct AST_STRUCT* for_increment;
 
     /* AST_OUTPUT */
     struct AST_STRUCT** output_expressions;  // Array of expressions to be output
     size_t output_expressions_size;          // Number of expressions in the array
 
+    /* AST_INPUT */
+    struct AST_STRUCT* input_expression;  // For input statements (add this)
+    size_t input_expressions_size;
 } AST_T;
-
-
-
-
-
 
 AST_T* init_ast(int type)
 {
@@ -113,37 +111,29 @@ AST_T* init_ast(int type)
     ast->identifier = (void*)0;
     ast->dec_assign_stmt = (void*)0;
     ast->ident_list = (void*)0;
-
+    
     /* AST_DECLARATION_ASSIGNMENT_STATEMENT */
-    ast->declaration_assignment_statement_identifier = (void*)0 ; 
+    ast->declaration_assignment_statement_identifier = (void*)0 ;
     ast->declaration_assignment_statement_value = (void*)0;
 
-    /* AST_VARIABLE_DEFINITION*/
-    ast->variable_definition_variable_name = (void*)0; 
+    /* AST_VARIABLE_DEFINITION */
+    ast->variable_definition_variable_name = (void*)0;
     ast->variable_definition_value = (void*)0;
 
     /* AST_VARIABLE */
     ast->variable_name = (void*)0;
 
-     /* AST_FUNCTION_CALL */
+    /* AST_FUNCTION_CALL */
     ast->function_call_name = (void*)0;
-    ast->function_call_arguments = (void*)0; 
+    ast->function_call_arguments = (void*)0;
     ast->function_call_arguments_size = 0;
 
     /* AST_STRING */
     ast->string_value = (void*)0;
 
     /* AST_COMPOUND */
-    ast->compound_value = (void*)0;;
-    ast->compound_size = 0; 
-
-
-    /* AST_ASSIGNMENT */
-    char* assignment_identifier;
-    struct AST_STRUCT* assignment_expression;
-
-    AST_T* ast = calloc(1, sizeof(struct AST_STRUCT));
-    ast->type = type;
+    ast->compound_value = (void*)0;
+    ast->compound_size = 0;
 
     /* AST_OUTPUT */
     ast->output_expressions = (void*)0;
@@ -160,8 +150,13 @@ AST_T* init_ast(int type)
         ast->compound_value = calloc(1, sizeof(struct AST_STRUCT*));
         ast->compound_size = 0;
     }
+    else if (type == AST_INPUT)
+    {
+        ast->input_expression = (void*)0;  // Initialize input_expression as NULL
+    }
 
     return ast;
-
 }
+
+
 #endif
