@@ -6,6 +6,7 @@
 #include "AST.h"
 #include "token.h"
 #include "scope.h"
+#include "parser.h"
 
 typedef struct PARSER_STRUCT
 {
@@ -13,6 +14,7 @@ typedef struct PARSER_STRUCT
     token* current_token;
     token* prev_token;
     scope_T* scope;
+    AST_T* input_expression;
 } parser_T;
 
 parser_T* init_parser(lexer* lexer);
@@ -55,16 +57,16 @@ AST_T* parser_parse_declaration(parser_T* parser, scope_T* scope);
 
 AST_T* parser_parse_number(parser_T* parser, scope_T* scope);
 
+AST_T* parser_parse_input_statement(parser_T* parser, scope_T* scope);
 
 
-parser_T* init_parser(lexer* lexer){
+parser_T* init_parser(lexer* lexer)
+{
     parser_T* parser = calloc(1, sizeof(struct PARSER_STRUCT));
     parser->lexer = lexer;
     parser->current_token = token_buffer(lexer);
     parser->prev_token = parser->current_token;
-
     parser->scope = init_scope();
-
     return parser;
 }
 
@@ -133,7 +135,7 @@ AST_T* parser_parse_expr(parser_T* parser, scope_T* scope)
 // <assignment-stmt>
 AST_T* parser_parse_assignment(parser_T* parser, scope_T* scope)
 {
-    AST_T* assignment_statement = init_ast(AST_ASSIGNMENT); 
+    AST_T* assignment_statement = init_ast(AST_ASSIGNMENT);
     
     assignment_statement->assignment_identifier = parser->prev_token->value; // get assignment identifier
 
@@ -148,7 +150,7 @@ AST_T* parser_parse_assignment(parser_T* parser, scope_T* scope)
 AST_T* parser_parse_declaration(parser_T* parser, scope_T* scope)
 {
     // data-type
-    int declaration_statement_datatype = parser->current_token->type; // store the datatype    
+    int declaration_statement_datatype = parser->current_token->type; // store the datatype
     parser_eat(parser, TOKEN_DATATYPE); // expect a datatype
     
     // identifier or <dec-assign-stmt>
@@ -204,10 +206,42 @@ AST_T* parser_parse_conditional_statement(parser_T* parser, scope_T* scope)
     // if(strcmp(parser->current_token->value, "else")==0)
     // {
     //     parser_eat(parser, TOKEN_KEYWORD);
-       
     // }
 
 }
+
+AST_T* parser_parse_expression(parser_T* parser, scope_T* scope) {
+    // Make sure the returned expression is valid
+    AST_T* expr = some_expression_parsing_logic(parser, scope);
+    return expr;
+}
+
+
+// Function definitions
+AST_T* parser_parse_input_statement(parser_T* parser, scope_T* scope) {
+    // Initialize input statement AST node
+    AST_T* input_statement = init_ast(AST_INPUT);
+    input_statement->scope = scope;
+
+    // Eat the "input" keyword
+    parser_eat(parser, TOKEN_KEYWORD); // "input"
+
+    // Eat left parenthesis
+    parser_eat(parser, TOKEN_LPAREN);
+
+    // Parse the input expression (this could be a variable, function, etc.)
+    input_statement->input_expression = parser_parse_expression(parser, scope);
+
+    // Eat right parenthesis
+    parser_eat(parser, TOKEN_RPAREN);
+
+    // Eat semicolon
+    parser_eat(parser, TOKEN_SEMI);
+
+    return input_statement;
+}
+
+
 
 //<output-stmt>
 AST_T* parser_parse_output_statement(parser_T* parser, scope_T* scope)
@@ -224,7 +258,7 @@ AST_T* parser_parse_output_statement(parser_T* parser, scope_T* scope)
     
     // Initialize array to store expressions
     output_statement->output_expressions = calloc(1, sizeof(struct AST_STRUCT*));
-    output_statement->output_expressions_size = 0;s
+    output_statement->output_expressions_size = 0;
     
     // Parse first expression
     AST_T* expression = parser_parse_expression(parser, scope);
@@ -610,7 +644,7 @@ AST_T* parser_parse_id(parser_T* parser, scope_T* scope)
 
 AST_T* parser_parse_declaration_stmt(parser_T* parser, scope_T* scope)
 {
-       
+
 }
 
 #endif
