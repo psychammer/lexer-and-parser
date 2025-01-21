@@ -113,4 +113,17 @@ AST_T* scope_get_variable_definition(scope_T* scope, const char* name)
     return (void*)0;
 }
 
+// Do while loop example
+void example_do_while_loop(scope_T* scope)
+{
+    int i = 0;
+    do {
+        // Example logic: print function definition names
+        if (scope->function_definitions != NULL && i < scope->function_definitions_size) {
+            printf("Function name: %s\n", scope->function_definitions[i]->function_definition_name);
+        }
+        i++;
+    } while (i < scope->function_definitions_size);
+}
+
 #endif
