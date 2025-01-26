@@ -112,6 +112,7 @@ AST_T* visitor_visit(visitor_T* visitor, AST_T* node)
         case AST_FUNCTION_CALL: return visitor_visit_function_call(visitor, node); break;
         case AST_STRING: return visitor_visit_string(visitor, node); break;
         case AST_COMPOUND: return visitor_visit_compound(visitor, node); break;
+        case AST_DO_WHILE: return visitor_visit_do_while(visitor, node); break;
         case AST_ASSIGNMENT: return visitor_visit_assignment(visitor, node); break;
         case AST_NOOP: return node; break;
     }
@@ -252,6 +253,16 @@ AST_T* visitor_visit_compound(visitor_T* visitor, AST_T* node)
     return init_ast(AST_NOOP);
 }
 
+AST_T* visitor_visit_do_while(visitor_T* visitor, AST_T* node) {
+    printf("Do-While Loop\n");
+    do {
+        for (size_t i = 0; i < node->stmt_list_size; i++) {
+            visitor_visit(visitor, node->stmt_list[i]);
+        }
+    } while (evaluate_bool_expression(visitor, node->bool_expr)); // Implement evaluate_bool_expression
+    return node;
+}
+
 AST_T* visitor_visit_assignment(visitor_T* visitor, AST_T* node)
 {
     // AST_T* vassign = scope_get_variable_definition(
@@ -309,6 +320,11 @@ void print_ast_prefix(AST_T* node, visitor_T* visitor) {
                 }
             }
             printf(" }");
+            break;
+        case AST_DO_WHILE:
+            printf("Do-While Loop\n");
+            print_ast_prefix(node->stmt_list, visitor);
+            print_ast_prefix(node->bool_expr, visitor);
             break;
         case AST_NOOP:
             printf("NOOP");

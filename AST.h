@@ -19,6 +19,7 @@ typedef struct AST_STRUCT
         AST_FACTOR,
         AST_COMPOUND,
         AST_ITERATIVE,
+        AST_DO_WHILE,
         AST_OUTPUT, //OUTPUT
         AST_INPUT, //INPUT
         AST_NOOP // NULL OPERATION
@@ -91,6 +92,11 @@ typedef struct AST_STRUCT
     struct AST_STRUCT* iterative_body;
     struct AST_STRUCT* for_init;
     struct AST_STRUCT* for_increment;
+    
+    /* AST_DO_WHILE */
+    struct AST_STRUCT** stmt_list;
+    size_t stmt_list_size;         
+    struct AST_STRUCT* bool_expr; 
 
     /* AST_OUTPUT */
     struct AST_STRUCT** output_expressions;  // Array of expressions to be output
@@ -156,6 +162,18 @@ AST_T* init_ast(int type)
     }
 
     return ast;
+}
+// do while loop example
+void example_do_while_loop(AST_T* ast)
+{
+    int i = 0;
+    do {
+        // Example logic: print function call argument names
+        if (ast->function_call_arguments != NULL && i < ast->function_call_arguments_size) {
+            printf("Function call argument name: %s\n", ast->function_call_arguments[i]->function_definition_name);
+        }
+        i++;
+    } while (i < ast->function_call_arguments_size);
 }
 
 

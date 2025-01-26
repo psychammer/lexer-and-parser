@@ -400,6 +400,57 @@ AST_T* parser_parse_iterative_stmt(parser_T* parser, scope_T* scope){
     return iterative_stmt;
 }
 
+AST_T* parser_parse_do_while(parser_T* parser, scope_T* scope) {
+    parser_eat(parser, TOKEN_DO); // Eat 'do'
+
+    if (parser->current_token->type != TOKEN_LBRACE) {
+        printf("Error: Expected '{'\n");
+        exit(1);
+    }
+    parser_eat(parser, TOKEN_LBRACE); // Eat '{'
+
+    AST_T* stmt_list = parser_parse_statements(parser, scope); // Parse the statement list
+
+    if (parser->current_token->type != TOKEN_RBRACE) {
+        printf("Error: Expected '}'\n");
+        exit(1);
+    }
+    parser_eat(parser, TOKEN_RBRACE); // Eat '}'
+
+    if (parser->current_token->type != TOKEN_WHILE) {
+        printf("Error: Expected 'while'\n");
+        exit(1);
+    }
+    parser_eat(parser, TOKEN_WHILE); // Eat 'while'
+
+    if (parser->current_token->type != TOKEN_LPAREN) {
+        printf("Error: Expected '('\n");
+        exit(1);
+    }
+    parser_eat(parser, TOKEN_LPAREN); // Eat '('
+
+    AST_T* bool_expr = parser_parse_bool_expression(parser, scope); // Parse the boolean expression
+
+    if (parser->current_token->type != TOKEN_RPAREN) {
+        printf("Error: Expected ')'\n");
+        exit(1);
+    }
+    parser_eat(parser, TOKEN_RPAREN); // Eat ')'
+
+    if (parser->current_token->type != TOKEN_SEMI) {
+        printf("Error: Expected ';'\n");
+        exit(1);
+    }
+    parser_eat(parser, TOKEN_SEMI); // Eat ';'
+
+    AST_T* do_while_node = init_ast(AST_DO_WHILE);
+    do_while_node->stmt_list = stmt_list;
+    do_while_node->stmt_list_size = stmt_list->compound_size;
+    do_while_node->bool_expr = bool_expr;
+
+    return do_while_node;
+}
+
 AST_T* parser_parse_factor(parser_T* parser, scope_T* scope) {
     AST_T* node = init_ast(AST_FACTOR);
 
