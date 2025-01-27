@@ -5,6 +5,8 @@
         "string.h": "c",
         "ctype.h": "c",
         "lexer.h": "c",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "stdlib.h": "c",
+        "stdbool.h": "c"
     }
 }
