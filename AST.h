@@ -18,7 +18,14 @@ typedef struct AST_STRUCT
         AST_POWER,
         AST_FACTOR,
         AST_COMPOUND,
-        AST_NOOP // NULL OPERATION
+        AST_NOOP, // NULL OPERATION
+
+
+        // boolean expressions
+        AST_BOOL_EXPRESSION,
+        AST_BOOL_TERM,
+        AST_BOOL_FACTOR,
+        AST_COMPARISON
     }type;
 
     struct SCOPE_STRUCT* scope;
@@ -83,6 +90,29 @@ typedef struct AST_STRUCT
     /* AST_COMPOUND */
     struct AST_STRUCT** compound_value;
     size_t compound_size; 
+
+    //changes
+   struct AST_STRUCT* bool_expr_left;
+    struct AST_STRUCT* bool_expr_right;
+    char* bool_expr_operator;  // "||"
+
+    /* AST_BOOL_TERM - for AND operations */
+    struct AST_STRUCT* bool_term_left;
+    struct AST_STRUCT* bool_term_right;
+    char* bool_term_operator;  // "&&"
+
+    /* AST_BOOL_FACTOR */
+    struct AST_STRUCT* bool_factor_expr;  // For nested expressions in parentheses
+    int is_not;                          // Flag for NOT operation
+    int bool_literal_value;              // For true/false literals
+    struct AST_STRUCT* comparison;        // For comparison expressions
+
+    /* AST_COMPARISON */
+    struct AST_STRUCT* comparison_left;
+    struct AST_STRUCT* comparison_right;
+    char* comparison_operator;  // "==", "!=", "<", ">", "<=", ">="
+  // for true/false literals
+
 } AST_T;
 
 
@@ -129,7 +159,27 @@ AST_T* init_ast(int type)
     char* assignment_identifier;
     struct AST_STRUCT* assignment_expression;
 
+    /* AST_BOOL_EXPRESSION*/
+    ast->bool_expr_left = (void*)0;
+    ast->bool_expr_right = (void*)0;
+    ast->bool_expr_operator = (void*)0;
+
+    ast->bool_term_left = (void*)0;
+    ast->bool_term_right = (void*)0;
+    ast->bool_term_operator = (void*)0;
+
+    ast->bool_factor_expr = (void*)0;
+    ast->is_not = 0;
+    ast->bool_literal_value = 0;
+    ast->comparison = (void*)0;
+
+    ast->comparison_left = (void*)0;
+    ast->comparison_right = (void*)0;
+    ast->comparison_operator = (void*)0;
+
     return ast;
+
+
 
 }
 #endif

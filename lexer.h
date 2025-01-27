@@ -855,11 +855,11 @@ token* get_identifier_token(lexer* myLexer){
                     case 7: // check for fun'c'
                         if(myLexer->current_char=='c'){
                             realloc_token_value_then_advance(myToken, myLexer);
-                            state=12; // now check for func't'
+                            state=8; // now check for func't'
                             break;
                         }
                         else{
-                            state=-1; // no more keywords left, so maybe it's an id
+                            state=12; // no more keywords left, so maybe it's an id
                             break;
                         } 
                     case 8: // check for func't'
@@ -2470,7 +2470,7 @@ token* token_buffer(lexer* myLexer){
 
 
             default: 
-                return get_token_then_advance(myLexer, token_init(TOKEN_UNKNOWN, NULL)); break;
+                return get_token_then_advance(myLexer, token_init(TOKEN_UNKNOWN, char_to_string(myLexer->current_char))); break;
         }
 
         // printf("debug %d\n", myLexer->current_char);

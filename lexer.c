@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
 
 
 
- char* getTokenType(int tokenTypeInt) {
+  char* getTokenType(int tokenTypeInt) {
     switch (tokenTypeInt) {
         case 0: return "TOKEN_ID"; break;
         case 1: return "TOKEN_EQUALS"; break;
@@ -110,6 +110,18 @@ int main(int argc, char *argv[]){
         case 19: return "TOKEN_OPERATOR";break;
 
         case 20: return "TOKEN_KEYWORD";break;
+        case TOKEN_IF: return "TOKEN_IF"; break;
+        case TOKEN_ELSE: return "TOKEN_ELSE"; break;
+        case TOKEN_WHILE: return "TOKEN_WHILE"; break;
+        case TOKEN_DO: return "TOKEN_DO"; break;
+        case TOKEN_RETURN: return "TOKEN_RETURN"; break;
+        case TOKEN_FOR: return "TOKEN_FOR"; break;
+        case TOKEN_CASE: return "TOKEN_CASE"; break;
+        case TOKEN_BREAK: return "TOKEN_BREAK"; break;
+        case TOKEN_TRY: return "TOKEN_TRY"; break;
+        case TOKEN_CATCH: return "TOKEN_CATCH"; break;
+
+
         case 31: return "TOKEN_RESERVEDWORDS";break;
         case 32: return "TOKEN_DATATYPE";break;
         case 33: return "TOKEN_INT";break;
@@ -121,8 +133,18 @@ int main(int argc, char *argv[]){
         case 39: return "TOKEN_SINGLECOMMENT";break;
         case 40: return "TOKEN_MULTICOMMENT";break;
         case 41: return "TOKEN_NUMBER";break;
-        case TOKEN_CONST: return "TOKEN_CONST"; break;
+        case TOKEN_CHECK: return "TOKEN_CHECK"; break;
+        case TOKEN_ELIF: return "TOKEN_ELIF"; break;
+        case TOKEN_ENDLOOP: return "TOKEN_ENDLOOP"; break;
+        case TOKEN_FUNCTION: return "TOKEN_FUNCTION"; break;
+        case TOKEN_LOOP: return "TOKEN_LOOP"; break;
+        case TOKEN_OTHERWISE: return "TOKEN_OTHERWISE"; break;
+        case TOKEN_PRINTOUT: return "TOKEN_PRINTOUT"; break;
+        case TOKEN_SWITCH: return "TOKEN_SWITCH"; break;
+        case TOKEN_TERMINATE: return "TOKEN_TERMINATE"; break;
+        case TOKEN_TERMINATEALL: return "TOKEN_TERMINATEALL"; break; 
         case TOKEN_BLANK: return "TOKEN_BLANK"; break;
+        case TOKEN_CONST: return "TOKEN_CONST"; break;
         default: return "UNKNOWN_TOKEN";break;
     }
 }

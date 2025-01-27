@@ -32,6 +32,11 @@ AST_T* visitor_visit_assignment(visitor_T* visitor, AST_T* node);
 
 void print_ast_prefix(AST_T* node, visitor_T* visitor);
 
+AST_T* visitor_visit_bool_expression(visitor_T* visitor, AST_T* node);
+AST_T* visitor_visit_bool_term(visitor_T* visitor, AST_T* node);
+AST_T* visitor_visit_bool_factor(visitor_T* visitor, AST_T* node);
+AST_T* visitor_visit_comparison(visitor_T* visitor, AST_T* node);
+
 
 
 
@@ -113,7 +118,16 @@ AST_T* visitor_visit(visitor_T* visitor, AST_T* node)
         case AST_STRING: return visitor_visit_string(visitor, node); break;
         case AST_COMPOUND: return visitor_visit_compound(visitor, node); break;
         case AST_ASSIGNMENT: return visitor_visit_assignment(visitor, node); break;
+        
+        //changes
+        case AST_BOOL_EXPRESSION: return visitor_visit_bool_expression(visitor, node); break;
+        case AST_BOOL_TERM: return visitor_visit_bool_term(visitor, node); break;
+        case AST_BOOL_FACTOR: return visitor_visit_bool_factor(visitor, node); break;
+        case AST_COMPARISON: return visitor_visit_comparison(visitor, node); break;
+
         case AST_NOOP: return node; break;
+
+        
     }
 
     printf("Uncaught statement of type `%d`\n", node->type);
@@ -273,6 +287,106 @@ AST_T* visitor_visit_assignment(visitor_T* visitor, AST_T* node)
 }
 
 
+
+AST_T* visitor_visit_bool_expression(visitor_T* visitor, AST_T* node)
+{
+    fprintf(visitor->filename, "bool_expression -> ");
+    
+    // Visit left operand
+    print_ast_prefix(node->bool_expr_left, visitor);
+    
+    // Print operator
+    if (node->bool_expr_operator) {
+        fprintf(visitor->filename, " or ");
+    }
+    
+    // Visit right operand if it exists
+    if (node->bool_expr_right) {
+        print_ast_prefix(node->bool_expr_right, visitor);
+    }
+    
+    fprintf(visitor->filename, "\n");
+    
+    // Add to scope
+    scope_add_bool_expression(node->scope, node);
+    
+    return node;
+}
+
+AST_T* visitor_visit_bool_term(visitor_T* visitor, AST_T* node)
+{
+    fprintf(visitor->filename, "bool_term -> ");
+    
+    // Visit left operand
+    print_ast_prefix(node->bool_term_left, visitor);
+    
+    // Print operator
+    if (node->bool_term_operator) {
+        fprintf(visitor->filename, " and ");
+    }
+    
+    // Visit right operand if it exists
+    if (node->bool_term_right) {
+        print_ast_prefix(node->bool_term_right, visitor);
+    }
+    
+    fprintf(visitor->filename, "\n");
+    
+    // Add to scope
+    scope_add_bool_term(node->scope, node);
+    
+    return node;
+}
+
+AST_T* visitor_visit_bool_factor(visitor_T* visitor, AST_T* node)
+{
+    fprintf(visitor->filename, "bool_factor -> ");
+    
+    if (node->is_not) {  // Handle NOT operator
+        fprintf(visitor->filename, "not ");
+    }
+    
+    if (node->bool_literal_value >= 0) {  // It's a boolean literal
+        fprintf(visitor->filename, "%s", node->bool_literal_value ? "true" : "false");
+    } else if (node->bool_factor_expr) {  // Nested expression
+        print_ast_prefix(node->bool_factor_expr, visitor);
+    } else if (node->comparison) {  // Comparison
+        print_ast_prefix(node->comparison, visitor);
+    }
+    
+    fprintf(visitor->filename, "\n");
+    
+    // Add to scope
+    scope_add_bool_factor(node->scope, node);
+    
+    return node;
+}
+
+AST_T* visitor_visit_comparison(visitor_T* visitor, AST_T* node)
+{
+    fprintf(visitor->filename, "comparison -> ");
+    
+    // Visit left operand
+    if (node->comparison_left) {
+        print_ast_prefix(node->comparison_left, visitor);
+    }
+    
+    // Print comparison operator
+    if (node->comparison_operator) {
+        fprintf(visitor->filename, " %s ", node->comparison_operator);
+    }
+    
+    // Visit right operand
+    if (node->comparison_right) {
+        print_ast_prefix(node->comparison_right, visitor);
+    }
+    
+    fprintf(visitor->filename, "\n");
+    
+    return node;
+}
+
+
 void print_ast_prefix(AST_T* node, visitor_T* visitor) {
     if (node == NULL) {
         return;
@@ -310,6 +424,34 @@ void print_ast_prefix(AST_T* node, visitor_T* visitor) {
             }
             printf(" }");
             break;
+
+         case AST_COMPARISON:
+            print_ast_prefix(node->comparison_left, visitor);
+            fprintf(visitor->filename, " %s ", node->comparison_operator);
+            print_ast_prefix(node->comparison_right, visitor);
+            break;
+
+        case AST_BOOL_EXPRESSION:
+            print_ast_prefix(node->bool_expr_left, visitor);
+            fprintf(visitor->filename, " %s ", node->bool_expr_operator);
+            print_ast_prefix(node->bool_expr_right, visitor);
+            break;
+
+        case AST_BOOL_TERM:
+            print_ast_prefix(node->bool_term_left, visitor);
+            fprintf(visitor->filename, " %s ", node->bool_term_operator);
+            print_ast_prefix(node->bool_term_right, visitor);
+            break;
+
+        case AST_BOOL_FACTOR:
+            if (node->bool_literal_value) {
+                fprintf(visitor->filename, "true");
+            } else {
+                fprintf(visitor->filename, "false");
+            }
+            break;
+
+
         case AST_NOOP:
             printf("NOOP");
             break;
@@ -318,6 +460,7 @@ void print_ast_prefix(AST_T* node, visitor_T* visitor) {
             break;
     }
 }
+// Add boolean handling to print_ast_prefix
 
 
 #endif

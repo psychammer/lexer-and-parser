@@ -1,2 +1,7 @@
 Program -> statements
+statements -> <function-definition-stmt> | 
+Function_definition -> <datatype> <identifier> <parameter-list> <statements>
+identifier -> greetUser
+parameter-list -> int a, int b, 
 statements -> 
+

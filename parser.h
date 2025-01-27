@@ -180,19 +180,64 @@ AST_T* parser_parse_declaration(parser_T* parser, scope_T* scope)
 // <bool-factor
 AST_T* parser_parse_bool_factor(parser_T* parser, scope_T* scope)
 {
+    AST_T* node = init_ast(AST_BOOL_FACTOR);
     
+    // Handle true/false literals
+    if (parser->current_token->type == TOKEN_BOOL) {
+        node->bool_literal_value = strcmp(parser->current_token->value, "true") == 0;
+        parser_eat(parser, TOKEN_BOOL);
+        return node;
+    }
+    
+    // Handle comparisons (e.g., x > 5)
+    AST_T* left = parser_parse_expression(parser, scope);
+    
+    if (parser->current_token->type == TOKEN_OPERATOR) {
+        AST_T* comparison = init_ast(AST_COMPARISON);
+        comparison->comparison_left = left;
+        comparison->comparison_operator = parser->current_token->value;
+        parser_eat(parser, TOKEN_OPERATOR);
+        comparison->comparison_right = parser_parse_expression(parser, scope);
+        return comparison;
+    }
+    
+    return left;
 }
 
 // <bool-term>
 AST_T* parser_parse_bool_term(parser_T* parser, scope_T* scope)
 {
-
+    AST_T* node = parser_parse_bool_factor(parser, scope);
+    
+    while (parser->current_token != (void*)0 && 
+           strcmp(parser->current_token->value, "and") == 0) {
+        AST_T* bool_term = init_ast(AST_BOOL_TERM);
+        bool_term->bool_term_left = node;
+        bool_term->bool_term_operator = strdup("and");  // Use strdup to allocate new memory
+        parser_eat(parser, TOKEN_KEYWORD); // "and" keyword
+        bool_term->bool_term_right = parser_parse_bool_factor(parser, scope);
+        node = bool_term;
+    }
+    
+    return node;
 }
 
 // <bool-expression>
 AST_T* parser_parse_bool_expression(parser_T* parser, scope_T* scope)
 {
-
+   AST_T* node = parser_parse_bool_term(parser, scope);
+    
+    while (parser->current_token != (void*)0 && 
+           strcmp(parser->current_token->value, "or") == 0) {
+        AST_T* bool_expr = init_ast(AST_BOOL_EXPRESSION);
+        bool_expr->bool_expr_left = node;
+        bool_expr->bool_expr_operator = strdup("or");  // Use strdup to allocate new memory
+        parser_eat(parser, TOKEN_KEYWORD); // "or" keyword
+        bool_expr->bool_expr_right = parser_parse_bool_term(parser, scope);
+        node = bool_expr;
+    }
+    
+    return node;
 }
 
 // <conditional-stmt>
