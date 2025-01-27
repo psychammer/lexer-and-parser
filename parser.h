@@ -199,16 +199,88 @@ AST_T* parser_parse_bool_expression(parser_T* parser, scope_T* scope)
 
 // <conditional-stmt>
 AST_T* parser_parse_conditional_statement(parser_T* parser, scope_T* scope)
-{
-    parser_eat(parser, TOKEN_LPAREN);
-    
-    parser_eat(parser, TOKEN_RPAREN);
-    // if(strcmp(parser->current_token->value, "else")==0)
-    // {
-    //     parser_eat(parser, TOKEN_KEYWORD);
-    // }
+{/*
+    AST_T* compound = init_ast(AST_COMPOUND);
+    compound->scope = scope;
+    compound->compound_value = calloc(1, sizeof(struct AST_STRUCT*));
 
-}
+    AST_T* conditional_stmt = init_ast(AST_CONDITIONAL);
+
+    if (strcmp(parser->current_token->value, "if")==0) { // starting if stmt
+        parser_eat(parser, TOKEN_KEYWORD);
+        parser_eat(parser, TOKEN_LPAREN);
+
+        conditional_stmt->conditional_condition = parser_parse_bool_expression(parser, scope);
+
+        parser_eat(parser, TOKEN_RPAREN);
+
+        parser_eat(parser, TOKEN_LBRACE);
+        conditional_stmt->conditional_body = parser_parse_statements(parser, scope);
+        parser_eat(parser, TOKEN_RBRACE);
+
+        conditional_stmt->scope = scope;
+        compound->compound_value[0] = conditional_stmt;
+        compound->compound_size += 1;
+
+        if (strcmp(parser->current_token->value, "else if")==0) { // if "if statement" is followed by else if
+            while (strcmp(parser->current_token->value, "else if")==0){ // loop for multiple "else if"
+                parser_eat(parser, TOKEN_KEYWORD);
+                parser_eat(parser, TOKEN_LPAREN);
+
+                conditional_stmt->conditional_condition = parser_parse_bool_expression(parser, scope);
+
+                parser_eat(parser, TOKEN_RPAREN);
+
+                parser_eat(parser, TOKEN_LBRACE);
+                conditional_stmt->conditional_body = parser_parse_statements(parser, scope);
+                parser_eat(parser, TOKEN_RBRACE);
+
+                if (conditional_stmt){
+                    compound->compound_size += 1;
+                    compound->compound_value = realloc(compound->compound_value, compound->compound_size * sizeof(struct AST_STRUCT*));
+                    compound->compound_value[compound->compound_size-1] = conditional_stmt;
+                }
+            }
+            if (strcmp(parser->current_token->value, "else")==0){ // if "else if" is followd by "else"
+                parser_eat(parser, TOKEN_KEYWORD);
+                parser_eat(parser, TOKEN_LPAREN);
+
+                conditional_stmt->conditional_condition = parser_parse_bool_expression(parser, scope);
+
+                parser_eat(parser, TOKEN_RPAREN);
+
+                parser_eat(parser, TOKEN_LBRACE);
+                conditional_stmt->conditional_body = parser_parse_statements(parser, scope);
+                parser_eat(parser, TOKEN_RBRACE);
+
+                if (conditional_stmt){
+                    compound->compound_size += 1;
+                    compound->compound_value = realloc(compound->compound_value, compound->compound_size * sizeof(struct AST_STRUCT*));
+                    compound->compound_value[compound->compound_size-1] = conditional_stmt;
+                }
+            }    
+        }
+        else if (strcmp(parser->current_token->value, "else")==0){ // if "if statement" is followed by else
+            parser_eat(parser, TOKEN_KEYWORD);
+                    parser_eat(parser, TOKEN_LPAREN);
+
+                    conditional_stmt->conditional_condition = parser_parse_bool_expression(parser, scope);
+
+                    parser_eat(parser, TOKEN_RPAREN);
+
+                    parser_eat(parser, TOKEN_LBRACE);
+                    conditional_stmt->conditional_body = parser_parse_statements(parser, scope);
+                    parser_eat(parser, TOKEN_RBRACE);
+
+                    if (conditional_stmt){
+                        compound->compound_size += 1;
+                        compound->compound_value = realloc(compound->compound_value, compound->compound_size * sizeof(struct AST_STRUCT*));
+                        compound->compound_value[compound->compound_size-1] = conditional_stmt;
+                    }
+        }
+    }
+    return compound;
+*/}
 
 AST_T* parser_parse_expression(parser_T* parser, scope_T* scope) {
     // Make sure the returned expression is valid
