@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #Valid identifiers:
 _age
 height
@@ -15,3 +16,8 @@ string name = "roljohn";
 age%
 my name
 price@
+=======
+function greetUser(int a, int b) {
+    
+}
+>>>>>>> origin/lexer-and-parser

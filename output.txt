@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 TOKEN_NAME           | TOKEN_CODE      | TOKEN_VALUE                    | TOKEN_LINE_NUMBER   
 ---------------------|-----------------|--------------------------------|---------------------
 TOKEN_SINGLECOMMENT  | 39              | Valid identifiers:             | 0                   
@@ -25,3 +26,12 @@ TOKEN_ID             | 0               | my                             | 15
 TOKEN_ID             | 0               | name                           | 15                  
 TOKEN_ID             | 0               | price                          | 16                  
 TOKEN_SYMBOL         | 3               | @                              | 16                  
+=======
+Program -> statements
+statements -> <function-definition-stmt> | 
+Function_definition -> <datatype> <identifier> <parameter-list> <statements>
+identifier -> greetUser
+parameter-list -> int a, int b, 
+statements -> 
+
+>>>>>>> origin/lexer-and-parser
