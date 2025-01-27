@@ -18,6 +18,7 @@ typedef struct AST_STRUCT
         AST_POWER,
         AST_FACTOR,
         AST_COMPOUND,
+        AST_CONDITIONAL
         AST_ITERATIVE,
         AST_DO_WHILE,
         AST_OUTPUT, //OUTPUT
@@ -87,6 +88,10 @@ typedef struct AST_STRUCT
     struct AST_STRUCT** compound_value;
     size_t compound_size;
 
+    /* AST_CONDITIONAL */
+    struct AST_STRUCT* conditional_condition;
+    struct AST_STRUCT* conditional_body;
+
     /* AST_ITERATIVE */
     struct AST_STRUCT* iterative_condition;
     struct AST_STRUCT* iterative_body;
@@ -140,6 +145,10 @@ AST_T* init_ast(int type)
     /* AST_COMPOUND */
     ast->compound_value = (void*)0;
     ast->compound_size = 0;
+
+    /* AST_CONDITIONAL */ 
+    ast->conditional_condition = (void*)0; 
+    ast->conditional_body = (void*)0;
 
     /* AST_OUTPUT */
     ast->output_expressions = (void*)0;
