@@ -243,11 +243,6 @@ AST_T* parser_parse_conditional_statement(parser_T* parser, scope_T* scope)
             }
             if (strcmp(parser->current_token->value, "else")==0){ // if "else if" is followd by "else"
                 parser_eat(parser, TOKEN_KEYWORD);
-                parser_eat(parser, TOKEN_LPAREN);
-
-                conditional_stmt->conditional_condition = parser_parse_bool_expression(parser, scope);
-
-                parser_eat(parser, TOKEN_RPAREN);
 
                 parser_eat(parser, TOKEN_LBRACE);
                 conditional_stmt->conditional_body = parser_parse_statements(parser, scope);
@@ -262,21 +257,16 @@ AST_T* parser_parse_conditional_statement(parser_T* parser, scope_T* scope)
         }
         else if (strcmp(parser->current_token->value, "else")==0){ // if "if statement" is followed by else
             parser_eat(parser, TOKEN_KEYWORD);
-                    parser_eat(parser, TOKEN_LPAREN);
 
-                    conditional_stmt->conditional_condition = parser_parse_bool_expression(parser, scope);
+            parser_eat(parser, TOKEN_LBRACE);
+            conditional_stmt->conditional_body = parser_parse_statements(parser, scope);
+            parser_eat(parser, TOKEN_RBRACE);
 
-                    parser_eat(parser, TOKEN_RPAREN);
-
-                    parser_eat(parser, TOKEN_LBRACE);
-                    conditional_stmt->conditional_body = parser_parse_statements(parser, scope);
-                    parser_eat(parser, TOKEN_RBRACE);
-
-                    if (conditional_stmt){
-                        compound->compound_size += 1;
-                        compound->compound_value = realloc(compound->compound_value, compound->compound_size * sizeof(struct AST_STRUCT*));
-                        compound->compound_value[compound->compound_size-1] = conditional_stmt;
-                    }
+            if (conditional_stmt){
+                compound->compound_size += 1;
+                compound->compound_value = realloc(compound->compound_value, compound->compound_size * sizeof(struct AST_STRUCT*));
+                compound->compound_value[compound->compound_size-1] = conditional_stmt;
+            }
         }
     }
     return compound;
