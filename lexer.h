@@ -6,7 +6,8 @@ typedef struct lexer_struct{
     char current_char;
     int i;
     char* content;
-
+    int current_line;
+    int current_column;
 }lexer;
 
 token* determineToken(lexer* myLexer, token* myToken, char* valueToCheck, int tokenType);
@@ -20,6 +21,8 @@ lexer* lexer_init(char* content){
     myLexer->content = content;
     myLexer->i = 0;
     myLexer->current_char = content[myLexer->i];
+    myLexer->current_line = 0;
+    myLexer->current_column = 0;
 
     return myLexer;
 }
@@ -85,7 +88,6 @@ int is_operator(char ch){
 
         default: return 0;
     }
-
 }
 
 
@@ -106,6 +108,8 @@ void retreat_lexer(lexer* myLexer){
 void skip_whitespace(lexer* myLexer){
     while(myLexer->current_char == ' ' || myLexer->current_char == 10 || myLexer->current_char == 13){
         advance_lexer(myLexer);
+        if(myLexer->current_char == 10)
+            myLexer->current_line+=1;
     }
 }
 
@@ -855,11 +859,11 @@ token* get_identifier_token(lexer* myLexer){
                     case 7: // check for fun'c'
                         if(myLexer->current_char=='c'){
                             realloc_token_value_then_advance(myToken, myLexer);
-                            state=12; // now check for func't'
+                            state=8; // now check for func't'
                             break;
                         }
                         else{
-                            state=-1; // no more keywords left, so maybe it's an id
+                            state=12; // no more keywords left, so maybe it's an id
                             break;
                         } 
                     case 8: // check for func't'
@@ -2217,8 +2221,7 @@ token* get_identifier_token(lexer* myLexer){
     
     myToken->value = string_buffer;
     myToken->type = TOKEN_ID;
-
-
+    myToken->line = myLexer->current_line;
     
     // // printf("buffered: %s %d\n", string_buffer, myToken->type);
     return myToken;
@@ -2245,6 +2248,7 @@ token* get_number_token(lexer* myLexer){
     }
     myToken->type = TOKEN_NUMBER;
     myToken->value = string_buffer;
+    myToken->line = myLexer->current_line;
     
     // printf("buffered: %s %d\n", string_buffer, myToken->type);
     return myToken;
@@ -2279,23 +2283,11 @@ token* get_string_token(lexer* myLexer){
     }
     
     myToken->value = string_buffer;
+    myToken->line = myLexer->current_line;
     
     // printf("buffered: %s %d\n", string_buffer, myToken->type);
     return myToken;
 }
-
-// token* get_assignment_token(lexer* myLexer, char curr_operator){
-//     char* string_buffer = malloc(sizeof(char)+2);
-
-//     string_buffer[0] = curr_operator;
-//     string_buffer[1] = myLexer->current_char;
-//     string_buffer[2] = '\0';
-//     advance_lexer(myLexer);
-
-//     token* myToken = malloc(sizeof(token));
-//     myToken->type = TOKEN_OPERATOR;
-//     myToken->value = string_buffer;
-// }
 
 char* get_single_line_string(lexer* myLexer){
 
@@ -2311,6 +2303,7 @@ char* get_single_line_string(lexer* myLexer){
 
         strcat(string_buffer, current_char_as_string);
         advance_lexer(myLexer);
+
     } 
 
     // printf("%s\n", string_buffer);
@@ -2336,52 +2329,41 @@ char* get_multi_line_string(lexer* myLexer){
         strcat(string_buffer, current_char_as_string);
 
         advance_lexer(myLexer);
+        if(myLexer->current_char == 10 || myLexer->current_char == 13){
+            skip_whitespace(myLexer);
+            string_buffer = realloc(string_buffer, strlen(string_buffer) + 3);
+            strcat(string_buffer, "\\n ");
+        }
+
         free(current_char_as_string);
     } 
     advance_lexer(myLexer);
-    advance_lexer(myLexer);
+    if(myLexer->current_char == 10 || myLexer->current_char == 13){
+        skip_whitespace(myLexer);
+    }
+    // advance_lexer(myLexer);
 
     return string_buffer;
 
 }
 
-
-// char* get_multi_line_string(lexer* myLexer){
-//     char* string_buffer = malloc(sizeof(char));
-//     char next_char = myLexer->content[myLexer->i+1];
-//     string_buffer[0] = '\0';
-//     while((myLexer->current_char!='*' && next_char!='/') && myLexer->current_char!='\0' && myLexer->current_char!=EOF){
-//         char* current_char_as_string = malloc(sizeof(char)+1);
-//         current_char_as_string[0] = myLexer->current_char;
-//         current_char_as_string[1] = '\0';
-
-//         string_buffer = realloc(string_buffer, strlen(string_buffer) + strlen(current_char_as_string) + 1);
-
-//         strcat(string_buffer, current_char_as_string);
-//         advance_lexer(myLexer);
-//         next_char = myLexer->content[myLexer->i+1];
-
-//         free(current_char_as_string);
-//     } 
-//     advance_lexer(myLexer);
-//     advance_lexer(myLexer);
-
-//     return string_buffer;
-
-// }
-
 token* get_comment_token(lexer* myLexer, int commentType){
     if(commentType==2){
-        return token_init(TOKEN_MULTICOMMENT, get_multi_line_string(myLexer));
-
+        int current_line = myLexer->current_line;
+        token* myToken = token_init(TOKEN_MULTICOMMENT, get_multi_line_string(myLexer));
+        myToken->line = current_line;
+        return myToken;
     }
     else if(commentType==1){
-        return token_init(TOKEN_SINGLECOMMENT, get_single_line_string(myLexer));
+        token* myToken = token_init(TOKEN_SINGLECOMMENT, get_single_line_string(myLexer));
+        myToken->line = myLexer->current_line;
+        return myToken;
     }
 }
 
 token* get_token_then_advance(lexer* myLexer, token* myToken){
     advance_lexer(myLexer);
+    myToken->line = myLexer->current_line;
     return myToken;
 }
 
@@ -2393,6 +2375,7 @@ char* char_to_string(char ch){
 }
 
 token* token_buffer(lexer* myLexer){
+    token* myToken = (void*)0;
     while(myLexer->current_char != EOF && myLexer->i < strlen(myLexer->content) || myLexer->current_char != '\0'){
         if(myLexer->current_char== ' ' || myLexer->current_char == 10 || myLexer->current_char == 13){
             skip_whitespace(myLexer);
@@ -2403,7 +2386,9 @@ token* token_buffer(lexer* myLexer){
         }
 
         if(isalnum(myLexer->current_char) || myLexer->current_char=='_'){
-            return get_identifier_token(myLexer);
+            myToken = get_identifier_token(myLexer);
+            myToken->line = myLexer->current_line;
+            return myToken;
         }
 
         if(myLexer->current_char == '"' || myLexer->current_char == '\''){
@@ -2432,7 +2417,9 @@ token* token_buffer(lexer* myLexer){
                 return get_token_then_advance(myLexer, token_init(TOKEN_OPERATOR, symbol));
             }
 
-            return token_init(TOKEN_OPERATOR, char_to_string(operator));
+            token* myToken = token_init(TOKEN_OPERATOR, char_to_string(operator));
+            myToken->line = myLexer->current_line;
+            return myToken;
         }
 
         if(myLexer->current_char == '\\'){
@@ -2470,7 +2457,7 @@ token* token_buffer(lexer* myLexer){
 
 
             default: 
-                return get_token_then_advance(myLexer, token_init(TOKEN_UNKNOWN, NULL)); break;
+                return get_token_then_advance(myLexer, token_init(TOKEN_UNKNOWN, char_to_string(myLexer->current_char))); break;
         }
 
         // printf("debug %d\n", myLexer->current_char);
@@ -2496,47 +2483,12 @@ token* determineToken(lexer* myLexer, token* myToken, char* valueToCheck, int to
         strcat(myToken->value, current_character);
         if(valueToCheck[i] == myLexer->current_char &&  isalnum(next_char) == 0 &&  next_char != '_' && i < strlen(valueToCheck)){ // if the token is followed by a '_' at the last char it is considered to be an identifier.
             myToken->type = tokenType; 
+            myToken->line = myLexer->current_line;
             return get_token_then_advance(myLexer, myToken);
         }
         advance_lexer(myLexer);
     }
     myToken->type =  TOKEN_ID;
+    myToken->line = myLexer->current_line;
     return get_token_then_advance(myLexer, myToken);
 }
-
-
-
-
-// int isNumber(const char *str) {
-//     if (str == NULL || *str == '\0') {
-//         return 0; // Empty or null strings are not numbers
-//     }
-
-//     const char *ptr = str;
-
-//     // Check for an optional leading sign
-//     if (*ptr == '+' || *ptr == '-') {
-//         ptr++;
-//     }
-
-//     int hasDigits = 0;
-//     int hasDot = 0;
-
-//     while (*ptr != '\0') {
-//         if (isdigit(*ptr)) {
-//             hasDigits = 1;
-//         } else if (*ptr == '.') {
-//             if (hasDot) {
-//                 return 0; // Multiple dots are not allowed
-//             }
-//             hasDot = 1;
-//         } else {
-//             return 0; // Any non-digit and non-dot character invalidates
-//         }
-//         ptr++;
-//     }
-
-//     // A valid number must have at least one digit
-//     return hasDigits;
-// }
-

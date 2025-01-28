@@ -73,6 +73,7 @@ typedef struct token_struct{
     }type;
 
     char* value;
+    int line;
 }token;
 
 token* token_init(int type, char* value){

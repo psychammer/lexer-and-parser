@@ -1,1 +1,17 @@
-5name
+#Valid identifiers:
+_age
+height
+Name
+School
+calculate
+char favorite_letter 
+string name = "roljohn";
+
+
+#Invalid identifiers:
+1name
+#score
+9_age
+age%
+my name
+price_haha

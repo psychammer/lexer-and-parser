@@ -4,15 +4,10 @@
 #include <ctype.h>
 #include "token.h"
 #include "lexer.h"
-#include "parser.h"
-#include "AST.h"
-#include "visitor.h"
-
-
-void print_ast_prefix(AST_T* node, visitor_T* visitor);
 
 char* getContent(char* filePath);
 char* getTokenType(int tokenTypeInt);
+int ends_with(const char *str, const char *suffix);
 
 int main(int argc, char *argv[]){
 
@@ -21,64 +16,65 @@ int main(int argc, char *argv[]){
 
     char* filePath = argv[1];
 
-    if(filePath[strlen(filePath)-2]!='r' && filePath[strlen(filePath)-1]!='i'){
-        printf("Incorrect file format.\n");
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <input_file.ri> <output_file.txt>\n", argv[0]);
+        return 1; // Indicate an error
+    }
+
+    if (!ends_with(filePath, ".ri")) {
+        fprintf(stderr, "Error: Input file must have the .ri extension.\n");
         return 1;
     }
 
     char* content = getContent(filePath);
 
-    if(content==NULL){
-        printf("Fail to read file.\n");
+    lexer* myLexer = lexer_init(content);
+
+    int size = 0;
+
+    token* token_arr = calloc(1, sizeof(token));
+
+    while(myLexer->current_char!=EOF && myLexer->i < strlen(myLexer->content)){
+
+        token* token_instance = token_buffer(myLexer);        
+
+        if(token_instance->value != NULL){
+            size++;
+
+            // Resize token array
+            token* temp = realloc(token_arr, size * sizeof(token));
+            token_arr = temp;
+
+            // Copy token instance data
+            token_arr[size - 1].type = token_instance->type;
+            token_arr[size - 1].value = strdup(token_instance->value);
+            token_arr[size - 1].line = token_instance->line;
+        }
+        
+    }
+
+    // printf("%s\n", content);
+
+    FILE *file = fopen(argv[2], "w");
+    if (file == NULL) {
+        perror("Error opening file");
         return 1;
     }
 
-    lexer* myLexer = lexer_init(content);
+    fprintf(file, "%-20s | %-15s | %-30s | %-20s\n", 
+        "TOKEN_NAME", "TOKEN_CODE", "TOKEN_VALUE", "TOKEN_LINE_NUMBER");
+    fprintf(file, "---------------------|-----------------|--------------------------------|---------------------\n");
 
+    for (int i = 0; i < size; i++) {
+        fprintf(file, "%-20s | %-15d | %-30s | %-20d\n", 
+                getTokenType(token_arr[i].type), 
+                token_arr[i].type, 
+                token_arr[i].value, 
+                token_arr[i].line+1);
+    }
 
-    int size = 0;
-    token* token_arr = malloc(sizeof(token));
-    // while(myLexer->current_char!=EOF && myLexer->i < strlen(myLexer->content)){
-    parser_T* parser = init_parser(myLexer);
-    AST_T* root = parser_parse(parser, parser->scope);
-    // print_ast_prefix(root);
-    visitor_T* visitor = init_visitor(argv[2]);
-    visitor_visit(visitor, root);
+    fclose(file);
 
-    fclose(visitor->filename);
-
-        // print_ast_prefix(root);
-        // token* token_instance = token_buffer(myLexer);        
-
-        // if(token_instance->value != NULL){
-        //     size++;
-
-        //     // Resize token array
-        //     token* temp = realloc(token_arr, size * sizeof(token));
-        //     token_arr = temp;
-
-        //     // Copy token instance data
-        //     token_arr[size - 1].type = token_instance->type;
-        //     token_arr[size - 1].value = strdup(token_instance->value);
-        // }
-        
-    // }
-
-    // printf("size of token: %d", size);
-
-    // FILE *file = fopen(argv[2], "w");
-    // if (file == NULL) {
-    //     perror("Error opening file");
-    //     return 1;
-    // }
-
-
-    // for(int i = 0; i < size; i++) {
-    //     fprintf(file, "%s, %s\n", getTokenType(token_arr[i].type), token_arr[i].value);
-    // }
-
-    // fclose(file);
-    
     
     return 0;
 }
@@ -110,6 +106,18 @@ int main(int argc, char *argv[]){
         case 19: return "TOKEN_OPERATOR";break;
 
         case 20: return "TOKEN_KEYWORD";break;
+        case TOKEN_IF: return "TOKEN_IF"; break;
+        case TOKEN_ELSE: return "TOKEN_ELSE"; break;
+        case TOKEN_WHILE: return "TOKEN_WHILE"; break;
+        case TOKEN_DO: return "TOKEN_DO"; break;
+        case TOKEN_RETURN: return "TOKEN_RETURN"; break;
+        case TOKEN_FOR: return "TOKEN_FOR"; break;
+        case TOKEN_CASE: return "TOKEN_CASE"; break;
+        case TOKEN_BREAK: return "TOKEN_BREAK"; break;
+        case TOKEN_TRY: return "TOKEN_TRY"; break;
+        case TOKEN_CATCH: return "TOKEN_CATCH"; break;
+
+
         case 31: return "TOKEN_RESERVEDWORDS";break;
         case 32: return "TOKEN_DATATYPE";break;
         case 33: return "TOKEN_INT";break;
@@ -121,8 +129,18 @@ int main(int argc, char *argv[]){
         case 39: return "TOKEN_SINGLECOMMENT";break;
         case 40: return "TOKEN_MULTICOMMENT";break;
         case 41: return "TOKEN_NUMBER";break;
-        case TOKEN_CONST: return "TOKEN_CONST"; break;
+        case TOKEN_CHECK: return "TOKEN_CHECK"; break;
+        case TOKEN_ELIF: return "TOKEN_ELIF"; break;
+        case TOKEN_ENDLOOP: return "TOKEN_ENDLOOP"; break;
+        case TOKEN_FUNCTION: return "TOKEN_FUNCTION"; break;
+        case TOKEN_LOOP: return "TOKEN_LOOP"; break;
+        case TOKEN_OTHERWISE: return "TOKEN_OTHERWISE"; break;
+        case TOKEN_PRINTOUT: return "TOKEN_PRINTOUT"; break;
+        case TOKEN_SWITCH: return "TOKEN_SWITCH"; break;
+        case TOKEN_TERMINATE: return "TOKEN_TERMINATE"; break;
+        case TOKEN_TERMINATEALL: return "TOKEN_TERMINATEALL"; break; 
         case TOKEN_BLANK: return "TOKEN_BLANK"; break;
+        case TOKEN_CONST: return "TOKEN_CONST"; break;
         default: return "UNKNOWN_TOKEN";break;
     }
 }
@@ -131,28 +149,42 @@ int main(int argc, char *argv[]){
 
 
 
-char* getContent(char* filePath){
-    FILE *fptr;
-
-    char ch;
-
-    fptr = fopen(filePath, "r");
-
-    if(fptr == NULL){
+char* getContent(char* filepath) {
+    FILE* file = fopen(filepath, "r");
+    if (file == NULL) {
+        perror("Error opening file");
         return NULL;
     }
 
-    char* content = malloc(sizeof(char));
-    while((ch=fgetc(fptr)) != EOF){
-        char* char_as_string = malloc(sizeof(char)+1);
-        char_as_string[0] = ch;
-        char_as_string[1] = '\0';
+    // Seek to the end to determine file size
+    fseek(file, 0, SEEK_END);
+    long fileSize = ftell(file);
+    rewind(file);  // Reset pointer to the start of the file
 
-        content = realloc(content, strlen(content)+ strlen(content) + 1);
-        strcat(content, char_as_string);
-
-        free(char_as_string);
+    // Allocate memory for the string (+1 for null terminator)
+    char* content = (char*)malloc((fileSize + 1) * sizeof(char));
+    if (content == NULL) {
+        perror("Error allocating memory");
+        fclose(file);
+        return NULL;
     }
 
+    // Read the file into the buffer
+    fread(content, sizeof(char), fileSize, file);
+    content[fileSize] = '\0';  // Null-terminate the string
+
+    fclose(file);
     return content;
+}
+
+int ends_with(const char *str, const char *suffix) {
+    if (!str || !suffix) {
+        return 0;
+    }
+    size_t str_len = strlen(str);
+    size_t suffix_len = strlen(suffix);
+    if (suffix_len > str_len) {
+        return 0;
+    }
+    return 0 == strncmp(str + str_len - suffix_len, suffix, suffix_len);
 }
