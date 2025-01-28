@@ -11,9 +11,6 @@ int ends_with(const char *str, const char *suffix);
 
 int main(int argc, char *argv[]){
 
-
-    token* myToken = token_init(TOKEN_ID, "myVariable");
-
     char* filePath = argv[1];
 
     if (argc != 3) {
