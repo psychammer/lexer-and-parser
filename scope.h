@@ -1,196 +1,235 @@
-#ifndef SCOPE_H
-#define SCOPE_H
-#include "AST.h"
-#include <string.h>
+#ifndef AST_H
+#define AST_H
+#include <stdlib.h>
 
-typedef struct SCOPE_STRUCT
+typedef struct AST_STRUCT
 {
-    AST_T** function_definitions;
-    size_t function_definitions_size;
-
-    AST_T** variable_definitions;
-    size_t variable_definitions_size;
-
-    AST_T** bool_expressions;
-    size_t bool_expressions_size;
-
-    AST_T** bool_terms;
-    size_t bool_terms_size;
-
-    AST_T** bool_factors;
-    size_t bool_factors_size;
-
-} scope_T;
-
-
-scope_T* init_scope();
-
-AST_T* scope_add_function_definition(scope_T* scope, AST_T* fdef);
-
-AST_T* scope_get_function_definition(scope_T* scope, const char* fname);
-
-AST_T* scope_add_variable_definition(scope_T* scope, AST_T* vdef);
-
-AST_T* scope_get_variable_definition(scope_T* scope, const char* name);
-
-
-AST_T* scope_add_bool_expression(scope_T* scope, AST_T* bexpr);
-AST_T* scope_add_bool_term(scope_T* scope, AST_T* bterm);
-AST_T* scope_add_bool_factor(scope_T* scope, AST_T* bfactor);
-
-
-
-
-scope_T* init_scope()
-{
-    scope_T* scope = calloc(1, sizeof(struct SCOPE_STRUCT));
-
-    scope->function_definitions = (void*) 0;
-    scope->function_definitions_size = 0;
-
-    scope->variable_definitions = (void*) 0;
-    scope->variable_definitions_size = 0;
-
-    return scope;
-}
-
-AST_T* scope_add_function_definition(scope_T* scope, AST_T* fdef)
-{
-    
-    scope->function_definitions_size += 1;
-
-    if (scope->function_definitions == (void*)0)
+    enum
     {
-        
-        scope->function_definitions = calloc(1, sizeof(struct AST_STRUCT*));
+        AST_DECLARATION_ASSIGNMENT_STATEMENT,
+        AST_ASSIGNMENT,
+        AST_DECLARATION,
+        AST_VARIABLE_DEFINITION,
+        AST_FUNCTION_DEFINITION,
+        AST_VARIABLE,
+        AST_FUNCTION_CALL,
+        AST_STRING,
+        AST_EXPRESSION,
+        AST_TERM,
+        AST_POWER,
+        AST_FACTOR,
+        AST_COMPOUND,
+        AST_CONDITIONAL,
+        AST_ITERATIVE,
+        AST_DO_WHILE,
+        AST_OUTPUT, // OUTPUT
+        AST_INPUT,  // INPUT
+        AST_NOOP,   // NULL OPERATION
+
+        //
+        // AST_BOOL_EXPRESSION,
+        // AST_BOOL_TERM,
+        // AST_BOOL_FACTOR,
+        // AST_REL_EXPRESSION,
+    } type;
+
+    struct SCOPE_STRUCT *scope;
+
+    /* AST_DECLARATION_STATEMENT */
+    int datatype;
+    char *identifier;
+    struct AST_STRUCT *dec_assign_stmt;
+    struct AST_STRUCT *ident_list;
+
+    /* AST_DECLARATION_ASSIGNMENT_STATEMENT */
+    char *declaration_assignment_statement_identifier;
+    struct AST_STRUCT *declaration_assignment_statement_value;
+
+    /* AST_ASSIGNMENT */
+    char *assignment_identifier;
+    struct AST_STRUCT *assignment_expression;
+
+    /* AST_FUNCTION_DEFINITION */
+    struct AST_STRUCT *function_definition_body;
+    char *function_definition_name;
+    char *function_definition_datatype;
+    struct AST_STRUCT **function_definition_args;
+    char *function_definition_arg_datatype;
+    size_t function_definition_args_size;
+
+    /* AST_VARIABLE_DEFINITION*/
+    char *variable_definition_variable_name;
+    struct AST_STRUCT *variable_definition_value;
+
+    /* AST_VARIABLE */
+    char *variable_name;
+
+    /* AST_FUNCTION_CALL */
+    char *function_call_name;
+    struct AST_STRUCT **function_call_arguments;
+    size_t function_call_arguments_size;
+
+    /* AST_STRING */
+    char *string_value;
+
+    /* AST_EXPRESSION */
+    struct AST_STRUCT *first_term;
+    char *md_operator;
+    struct AST_STRUCT *second_term;
+
+    /* AST_TERM */
+    struct AST_STRUCT *first_power;
+    char *as_operator;
+    struct AST_STRUCT *second_power;
+
+    /* AST_POWER */
+    struct AST_STRUCT *first_factor;
+    char *p_operator;
+    struct AST_STRUCT *second_factor;
+
+    /* AST_FACTOR */
+    double number;
+    struct AST_STRUCT *expression;
+
+    /* AST_COMPOUND */
+    struct AST_STRUCT **compound_value;
+    size_t compound_size;
+
+    /* AST_CONDITIONAL */
+    struct AST_STRUCT *conditional_condition;
+    struct AST_STRUCT *conditional_body;
+
+    /* AST_ITERATIVE */
+    struct AST_STRUCT *iterative_condition;
+    struct AST_STRUCT *iterative_body;
+    struct AST_STRUCT *for_init;
+    struct AST_STRUCT *for_increment;
+
+    /* AST_DO_WHILE */
+    struct AST_STRUCT **stmt_list;
+    size_t stmt_list_size;
+    struct AST_STRUCT *bool_expr;
+
+    /* AST_OUTPUT */
+    struct AST_STRUCT **output_expressions; // Array of expressions to be output
+    size_t output_expressions_size;         // Number of expressions in the array
+
+    /* AST_INPUT */
+    struct AST_STRUCT *input_expression; // For input statements (add this)
+    size_t input_expressions_size;
+
+    // Added
+    // /* AST_BOOL_EXPRESSION */
+    // struct AST_STRUCT *bool_expr_left;
+    // struct AST_STRUCT *bool_expr_right;
+    // char *bool_expr_operator; // "||"
+
+    // /* AST_BOOL_TERM - for AND operations */
+    // struct AST_STRUCT *bool_term_left;
+    // struct AST_STRUCT *bool_term_right;
+    // char *bool_term_operator; // "&&"
+
+    // /* AST_BOOL_FACTOR */
+    // struct AST_STRUCT *bool_factor_expr; // For nested expressions in parentheses
+    // int is_not;                          // Flag for NOT operation
+    // int bool_literal_value;              // For true/false literals
+    // struct AST_STRUCT *comparison;
+
+    // /* AST_REL_EXPRESSION */
+    // struct AST_STRUCT *rel_expr_left;
+    // struct AST_STRUCT *rel_expr_right;
+    // char *rel_operator; // "==" "!=" ">" "<" ">=" "<="
+
+} AST_T;
+
+AST_T *init_ast(int type)
+{
+    AST_T *ast = calloc(1, sizeof(struct AST_STRUCT));
+    ast->type = type;
+
+    /* AST_DECLARATION_STATEMENT */
+    ast->datatype = -1;
+    ast->identifier = (void *)0;
+    ast->dec_assign_stmt = (void *)0;
+    ast->ident_list = (void *)0;
+
+    /* AST_DECLARATION_ASSIGNMENT_STATEMENT */
+    ast->declaration_assignment_statement_identifier = (void *)0;
+    ast->declaration_assignment_statement_value = (void *)0;
+
+    /* AST_VARIABLE_DEFINITION */
+    ast->variable_definition_variable_name = (void *)0;
+    ast->variable_definition_value = (void *)0;
+
+    /* AST_VARIABLE */
+    ast->variable_name = (void *)0;
+
+    /* AST_FUNCTION_CALL */
+    ast->function_call_name = (void *)0;
+    ast->function_call_arguments = (void *)0;
+    ast->function_call_arguments_size = 0;
+
+    /* AST_STRING */
+    ast->string_value = (void *)0;
+
+    /* AST_COMPOUND */
+    ast->compound_value = (void *)0;
+    ast->compound_size = 0;
+
+    /* AST_CONDITIONAL */
+    ast->conditional_condition = (void *)0;
+    ast->conditional_body = (void *)0;
+
+    /* AST_OUTPUT */
+    ast->output_expressions = (void *)0;
+    ast->output_expressions_size = 0;
+
+    /* Special initialization for OUTPUT type */
+    if (type == AST_OUTPUT)
+    {
+        ast->output_expressions = calloc(1, sizeof(struct AST_STRUCT *));
+        ast->output_expressions_size = 0;
     }
-    else
+    else if (type == AST_COMPOUND)
     {
-        scope->function_definitions =
-            realloc(
-                scope->function_definitions,
-                scope->function_definitions_size * sizeof(struct AST_STRUCT**)
-            );
+        ast->compound_value = calloc(1, sizeof(struct AST_STRUCT *));
+        ast->compound_size = 0;
+    }
+    else if (type == AST_INPUT)
+    {
+        ast->input_expression = (void *)0; // Initialize input_expression as NULL
     }
 
-    scope->function_definitions[scope->function_definitions_size-1] =
-        fdef;
+    // Added
+    // /* AST_BOOL_EXPRESSION*/
+    // ast->bool_expr_left = (void *)0;
+    // ast->bool_expr_right = (void *)0;
+    // ast->bool_expr_operator = (void *)0;
 
-    return fdef;
+    // ast->bool_term_left = (void *)0;
+    // ast->bool_term_right = (void *)0;
+    // ast->bool_term_operator = (void *)0;
+
+    // ast->bool_factor_expr = (void *)0;
+    // ast->is_not = 0;
+    // ast->bool_literal_value = 0;
+    // ast->comparison = (void *)0;
+
+    return ast;
 }
-
-AST_T* scope_get_function_definition(scope_T* scope, const char* fname)
+// do while loop example
+void example_do_while_loop(AST_T *ast)
 {
-    for (int i = 0; i < scope->function_definitions_size; i++)
+    int i = 0;
+    do
     {
-        AST_T* fdef = scope->function_definitions[i];
-
-        if (strcmp(fdef->function_definition_name, fname) == 0)
+        // Example logic: print function call argument names
+        if (ast->function_call_arguments != NULL && i < ast->function_call_arguments_size)
         {
-            return fdef;
+            printf("Function call argument name: %s\n", ast->function_call_arguments[i]->function_definition_name);
         }
-    }
-
-    return (void*)0;
-}
-
-AST_T* scope_add_variable_definition(scope_T* scope, AST_T* vdef)
-{
-    if (scope->variable_definitions == (void*) 0)
-    {
-        scope->variable_definitions = calloc(1, sizeof(struct AST_STRUCT*));
-        scope->variable_definitions[0] = vdef;
-        scope->variable_definitions_size += 1;
-    }
-    else
-    {
-        scope->variable_definitions_size += 1;
-        scope->variable_definitions = realloc(
-            scope->variable_definitions,
-            scope->variable_definitions_size * sizeof(struct AST_STRUCT*)  
-        );
-        scope->variable_definitions[scope->variable_definitions_size-1] = vdef;
-    }
-
-    return vdef;
-}
-
-AST_T* scope_get_variable_definition(scope_T* scope, const char* name)
-{
-    for (int i = 0; i < scope->variable_definitions_size; i++)
-    {
-        AST_T* vdef = scope->variable_definitions[i];
-
-        if (strcmp(vdef->variable_definition_variable_name, name) == 0)
-        {
-            return vdef;
-        }
-    }
-
-    return (void*)0;
-}
-
-AST_T* scope_add_bool_expression(scope_T* scope, AST_T* bexpr)
-{
-    if (scope->bool_expressions == (void*) 0)
-    {
-        scope->bool_expressions = calloc(1, sizeof(struct AST_STRUCT*));
-        scope->bool_expressions[0] = bexpr;
-        scope->bool_expressions_size += 1;
-    }
-    else
-    {
-        scope->bool_expressions_size += 1;
-        scope->bool_expressions = realloc(
-            scope->bool_expressions,
-            scope->bool_expressions_size * sizeof(struct AST_STRUCT*)
-        );
-        scope->bool_expressions[scope->bool_expressions_size-1] = bexpr;
-    }
-
-    return bexpr;
-}
-
-AST_T* scope_add_bool_term(scope_T* scope, AST_T* bterm)
-{
-    if (scope->bool_terms == (void*) 0)
-    {
-        scope->bool_terms = calloc(1, sizeof(struct AST_STRUCT*));
-        scope->bool_terms[0] = bterm;
-        scope->bool_terms_size += 1;
-    }
-    else
-    {
-        scope->bool_terms_size += 1;
-        scope->bool_terms = realloc(
-            scope->bool_terms,
-            scope->bool_terms_size * sizeof(struct AST_STRUCT*)
-        );
-        scope->bool_terms[scope->bool_terms_size-1] = bterm;
-    }
-
-    return bterm;
-}
-
-AST_T* scope_add_bool_factor(scope_T* scope, AST_T* bfactor)
-{
-    if (scope->bool_factors == (void*) 0)
-    {
-        scope->bool_factors = calloc(1, sizeof(struct AST_STRUCT*));
-        scope->bool_factors[0] = bfactor;
-        scope->bool_factors_size += 1;
-    }
-    else
-    {
-        scope->bool_factors_size += 1;
-        scope->bool_factors = realloc(
-            scope->bool_factors,
-            scope->bool_factors_size * sizeof(struct AST_STRUCT*)
-        );
-        scope->bool_factors[scope->bool_factors_size-1] = bfactor;
-    }
-
-    return bfactor;
+        i++;
+    } while (i < ast->function_call_arguments_size);
 }
 
 #endif
