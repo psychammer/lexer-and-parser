@@ -110,6 +110,7 @@ void skip_whitespace(lexer* myLexer){
         advance_lexer(myLexer);
         if(myLexer->current_char == 10)
             myLexer->current_line+=1;
+            
     }
 }
 
@@ -2379,6 +2380,12 @@ token* token_buffer(lexer* myLexer){
     while(myLexer->current_char != EOF && myLexer->i < strlen(myLexer->content) || myLexer->current_char != '\0'){
         if(myLexer->current_char== ' ' || myLexer->current_char == 10 || myLexer->current_char == 13){
             skip_whitespace(myLexer);
+        }
+
+        if(myLexer->current_char == 0 || myLexer->i >= strlen(myLexer->content) || myLexer->current_char == EOF){
+            myToken = token_init(TOKEN_EOF, "");
+            myToken->line = myLexer->current_line;
+            return myToken;
         }
 
         if(isdigit(myLexer->current_char)){

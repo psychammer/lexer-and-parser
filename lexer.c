@@ -46,6 +46,10 @@ int main(int argc, char *argv[]){
             token_arr[size - 1].type = token_instance->type;
             token_arr[size - 1].value = strdup(token_instance->value);
             token_arr[size - 1].line = token_instance->line;
+
+            if(token_instance->type == 42){
+                printf("%d\n",*token_instance->value);
+            }
         }
         
     }

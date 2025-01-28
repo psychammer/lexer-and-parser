@@ -1,17 +1,14 @@
-#Valid identifiers:
-_age
-height
-Name
-School
-calculate
-char favorite_letter 
-string name = "roljohn";
+age = 5 + 8 * 4**3 - 2 / 10**2;
 
 
-#Invalid identifiers:
-1name
-#score
-9_age
-age%
-my name
-price@
+
+
+
+
+
+
+
+
+
+
+

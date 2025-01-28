@@ -1,0 +1,58 @@
+Program(
+  Statements(
+    Statement(
+      Assignment(
+        Identifier(
+          TOKEN_ID: "age"
+        ),
+        TOKEN_OPERATOR: "=",
+        Expression(
+          Term(
+            Power(
+              Factor(
+                TOKEN_NUMBER: "5"
+              )
+            )
+          ),
+          TOKEN_OPERATOR: "+",
+          Term(
+            Power(
+              Factor(
+                TOKEN_NUMBER: "8"
+              )
+            ),
+            TOKEN_OPERATOR: "*",
+            Power(
+              Factor(
+                TOKEN_NUMBER: "4"
+              ),
+              TOKEN_OPERATOR: "**",
+              Factor(
+                TOKEN_NUMBER: "3"
+              )
+            )
+          ),
+          TOKEN_OPERATOR: "-",
+          Term(
+            Power(
+              Factor(
+                TOKEN_NUMBER: "2"
+              )
+            ),
+            TOKEN_OPERATOR: "/",
+            Power(
+              Factor(
+                TOKEN_NUMBER: "10"
+              ),
+              TOKEN_OPERATOR: "**",
+              Factor(
+                TOKEN_NUMBER: "2"
+              )
+            )
+          )
+        ),
+        TOKEN_SEMI
+      )
+    )
+  )
+)
