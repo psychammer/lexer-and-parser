@@ -1,37 +1,27 @@
-<<<<<<< HEAD
 TOKEN_NAME           | TOKEN_CODE      | TOKEN_VALUE                    | TOKEN_LINE_NUMBER   
 ---------------------|-----------------|--------------------------------|---------------------
-TOKEN_SINGLECOMMENT  | 39              | Valid identifiers:             | 0                   
-TOKEN_ID             | 0               | _age                           | 1                   
-TOKEN_ID             | 0               | height                         | 2                   
-TOKEN_ID             | 0               | Name                           | 3                   
-TOKEN_ID             | 0               | School                         | 4                   
-TOKEN_ID             | 0               | calculate                      | 5                   
-TOKEN_DATATYPE       | 32              | char                           | 6                   
-TOKEN_ID             | 0               | favorite_letter                | 6                   
-TOKEN_DATATYPE       | 32              | string                         | 7                   
-TOKEN_ID             | 0               | name                           | 7                   
-TOKEN_OPERATOR       | 19              | =                              | 7                   
-TOKEN_STRING         | 2               | roljohn                        | 7                   
-TOKEN_SEMI           | 4               | ;                              | 7                   
-TOKEN_SINGLECOMMENT  | 39              | Invalid identifiers:           | 10                  
-TOKEN_NUMBER         | 41              | 1                              | 11                  
-TOKEN_ID             | 0               | name                           | 11                  
-TOKEN_SINGLECOMMENT  | 39              | score                          | 12                  
-TOKEN_NUMBER         | 41              | 9                              | 13                  
-TOKEN_ID             | 0               | _age                           | 13                  
-TOKEN_ID             | 0               | age                            | 14                  
-TOKEN_OPERATOR       | 19              | %                              | 14                  
-TOKEN_ID             | 0               | my                             | 15                  
-TOKEN_ID             | 0               | name                           | 15                  
-TOKEN_ID             | 0               | price                          | 16                  
-TOKEN_SYMBOL         | 3               | @                              | 16                  
-=======
-Program -> statements
-statements -> <function-definition-stmt> | 
-Function_definition -> <datatype> <identifier> <parameter-list> <statements>
-identifier -> greetUser
-parameter-list -> int a, int b, 
-statements -> 
-
->>>>>>> origin/lexer-and-parser
+TOKEN_SINGLECOMMENT  | 39              | Valid identifiers:             | 1                   
+TOKEN_ID             | 0               | _age                           | 2                   
+TOKEN_ID             | 0               | height                         | 3                   
+TOKEN_ID             | 0               | Name                           | 4                   
+TOKEN_ID             | 0               | School                         | 5                   
+TOKEN_ID             | 0               | calculate                      | 6                   
+TOKEN_DATATYPE       | 32              | char                           | 7                   
+TOKEN_ID             | 0               | favorite_letter                | 7                   
+TOKEN_DATATYPE       | 32              | string                         | 8                   
+TOKEN_ID             | 0               | name                           | 8                   
+TOKEN_OPERATOR       | 19              | =                              | 8                   
+TOKEN_STRING         | 2               | roljohn                        | 8                   
+TOKEN_SEMI           | 4               | ;                              | 8                   
+TOKEN_SINGLECOMMENT  | 39              | Invalid identifiers:           | 11                  
+TOKEN_NUMBER         | 41              | 1                              | 12                  
+TOKEN_ID             | 0               | name                           | 12                  
+TOKEN_SINGLECOMMENT  | 39              | score                          | 13                  
+TOKEN_NUMBER         | 41              | 9                              | 14                  
+TOKEN_ID             | 0               | _age                           | 14                  
+TOKEN_ID             | 0               | age                            | 15                  
+TOKEN_OPERATOR       | 19              | %                              | 15                  
+TOKEN_ID             | 0               | my                             | 16                  
+TOKEN_ID             | 0               | name                           | 16                  
+TOKEN_ID             | 0               | price                          | 17                  
+TOKEN_SYMBOL         | 3               | @                              | 17                  

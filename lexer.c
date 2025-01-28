@@ -4,12 +4,6 @@
 #include <ctype.h>
 #include "token.h"
 #include "lexer.h"
-#include "parser.h"
-#include "AST.h"
-#include "visitor.h"
-
-
-void print_ast_prefix(AST_T* node, visitor_T* visitor);
 
 char* getContent(char* filePath);
 char* getTokenType(int tokenTypeInt);
@@ -37,81 +31,50 @@ int main(int argc, char *argv[]){
     lexer* myLexer = lexer_init(content);
 
     int size = 0;
-<<<<<<< HEAD
 
     token* token_arr = calloc(1, sizeof(token));
 
     while(myLexer->current_char!=EOF && myLexer->i < strlen(myLexer->content)){
 
         token* token_instance = token_buffer(myLexer);        
-=======
-    token* token_arr = malloc(sizeof(token));
-    // while(myLexer->current_char!=EOF && myLexer->i < strlen(myLexer->content)){
-    parser_T* parser = init_parser(myLexer);
-    AST_T* root = parser_parse(parser, parser->scope);
-    // print_ast_prefix(root);
-    visitor_T* visitor = init_visitor(argv[2]);
-    visitor_visit(visitor, root);
->>>>>>> origin/lexer-and-parser
 
-    fclose(visitor->filename);
+        if(token_instance->value != NULL){
+            size++;
 
-        // print_ast_prefix(root);
-        // token* token_instance = token_buffer(myLexer);        
+            // Resize token array
+            token* temp = realloc(token_arr, size * sizeof(token));
+            token_arr = temp;
 
-<<<<<<< HEAD
             // Copy token instance data
             token_arr[size - 1].type = token_instance->type;
             token_arr[size - 1].value = strdup(token_instance->value);
             token_arr[size - 1].line = token_instance->line;
         }
-=======
-        // if(token_instance->value != NULL){
-        //     size++;
-
-        //     // Resize token array
-        //     token* temp = realloc(token_arr, size * sizeof(token));
-        //     token_arr = temp;
-
-        //     // Copy token instance data
-        //     token_arr[size - 1].type = token_instance->type;
-        //     token_arr[size - 1].value = strdup(token_instance->value);
-        // }
->>>>>>> origin/lexer-and-parser
         
-    // }
+    }
 
     // printf("%s\n", content);
 
-    // FILE *file = fopen(argv[2], "w");
-    // if (file == NULL) {
-    //     perror("Error opening file");
-    //     return 1;
-    // }
+    FILE *file = fopen(argv[2], "w");
+    if (file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
 
     fprintf(file, "%-20s | %-15s | %-30s | %-20s\n", 
         "TOKEN_NAME", "TOKEN_CODE", "TOKEN_VALUE", "TOKEN_LINE_NUMBER");
     fprintf(file, "---------------------|-----------------|--------------------------------|---------------------\n");
 
-<<<<<<< HEAD
     for (int i = 0; i < size; i++) {
         fprintf(file, "%-20s | %-15d | %-30s | %-20d\n", 
                 getTokenType(token_arr[i].type), 
                 token_arr[i].type, 
                 token_arr[i].value, 
-                token_arr[i].line);
+                token_arr[i].line+1);
     }
 
     fclose(file);
 
-=======
-    // for(int i = 0; i < size; i++) {
-    //     fprintf(file, "%s, %s\n", getTokenType(token_arr[i].type), token_arr[i].value);
-    // }
-
-    // fclose(file);
-    
->>>>>>> origin/lexer-and-parser
     
     return 0;
 }
@@ -119,7 +82,7 @@ int main(int argc, char *argv[]){
 
 
 
-  char* getTokenType(int tokenTypeInt) {
+ char* getTokenType(int tokenTypeInt) {
     switch (tokenTypeInt) {
         case 0: return "TOKEN_ID"; break;
         case 1: return "TOKEN_EQUALS"; break;
@@ -213,7 +176,6 @@ char* getContent(char* filepath) {
     fclose(file);
     return content;
 }
-<<<<<<< HEAD
 
 int ends_with(const char *str, const char *suffix) {
     if (!str || !suffix) {
@@ -226,5 +188,3 @@ int ends_with(const char *str, const char *suffix) {
     }
     return 0 == strncmp(str + str_len - suffix_len, suffix, suffix_len);
 }
-=======
->>>>>>> origin/lexer-and-parser

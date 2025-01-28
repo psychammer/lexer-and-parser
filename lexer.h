@@ -2437,21 +2437,6 @@ token* token_buffer(lexer* myLexer){
             }
         }
 
-        if(myLexer->current_char == '\\'){
-            char* backslash = char_to_string(myLexer->current_char);
-            advance_lexer(myLexer);
-
-            backslash = realloc(backslash, 3);
-            strcat(backslash, char_to_string(myLexer->current_char));
-            switch(myLexer->current_char){
-                case 's': return get_token_then_advance(myLexer, token_init(TOKEN_BLANK, backslash));
-                case 't': return get_token_then_advance(myLexer, token_init(TOKEN_BLANK, backslash));
-                case 'n': return get_token_then_advance(myLexer, token_init(TOKEN_BLANK, backslash));
-                default:
-                    return get_token_then_advance(myLexer, token_init(TOKEN_UNKNOWN, backslash)); break;
-            }
-        }
-
         switch(myLexer->current_char){
             case '.': return get_token_then_advance(myLexer, token_init(TOKEN_DOT, char_to_string('.'))); break;
             case '@': return get_token_then_advance(myLexer, token_init(TOKEN_SYMBOL, char_to_string('@'))); break;
