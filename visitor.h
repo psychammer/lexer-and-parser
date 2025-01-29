@@ -387,6 +387,31 @@ void print_ast_prefix(AST_T *node, visitor_T *visitor)
     default:
         printf("UNKNOWN");
         break;
+        // Added
+        // case AST_BOOL_EXPRESSION:
+        //     printf("Bool Expression\n");
+        //     print_ast_prefix(node->bool_expr, visitor);
+        //     break;
+        // case AST_BOOL_TERM:
+        //     printf("Bool Term\n");
+        //     print_ast_prefix(node->bool_term_left, visitor);
+        //     printf(" %s ", node->bool_term_operator);
+        //     print_ast_prefix(node->bool_term_right, visitor);
+        //     break;
+        // case AST_BOOL_FACTOR:
+        //     printf("Bool Factor\n");
+        //     if (node->is_not)
+        //     {
+        //         printf("!");
+        //     }
+        //     print_ast_prefix(node->bool_factor_expr, visitor);
+        //     break;
+        // case AST_REL_EXPRESSION:
+        //     printf("Rel Expression\n");
+        //     print_ast_prefix(node->rel_expr_left, visitor);
+        //     printf(" %s ", node->rel_operator);
+        //     print_ast_prefix(node->rel_expr_right, visitor);
+        //     break;
     }
 }
 
