@@ -59,6 +59,9 @@ AST_T *parser_parse_number(parser_T *parser, scope_T *scope);
 
 AST_T *parser_parse_input_statement(parser_T *parser, scope_T *scope);
 
+AST_T *parser_parse_function_statement(parser_T *parser, scope_T *scope);
+
+
 // Added
 // AST_T *parser_parse_bool_expression(parser_T *parser, scope_T *scope);
 
@@ -67,6 +70,9 @@ AST_T *parser_parse_input_statement(parser_T *parser, scope_T *scope);
 // AST_T *parser_parse_bool_factor(parser_T *parser, scope_T *scope);
 
 // AST_T *parser_parse_rel_expression(parser_T *parser, scope_T *scope);
+
+// AST_T *parser_parse_function_statement(parser_T *parser, scope_T *scope);
+
 
 parser_T *init_parser(lexer *lexer)
 {
@@ -836,5 +842,64 @@ AST_T *parser_parse_id(parser_T *parser, scope_T *scope)
 AST_T *parser_parse_declaration_stmt(parser_T *parser, scope_T *scope)
 {
 }
+
+//Added
+// // FUNCTION STATEMENT
+
+// AST_T *parser_parse_function_statement(parser_T *parser, scope_T *scope) {
+//     AST_T *function_stmt = init_ast(AST_FUNCTION_STATEMENT);
+
+//     // Eat "fun" keyword
+//     parser_eat(parser, TOKEN_FUNCTION);
+
+//     // Parse function name
+//     function_stmt->function_name = strdup(parser->current_token->value);  // Copy the function name
+//     parser_eat(parser, TOKEN_ID);
+
+//     // Eat left parenthesis
+//     parser_eat(parser, TOKEN_LPAREN);
+
+//     // Parse parameter list (optional)
+//     function_stmt->parameters = NULL;  // Start with NULL
+//     function_stmt->parameters_size = 0;
+
+//     if (parser->current_token->type != TOKEN_RPAREN) {
+//         do {
+//             AST_T *param = parser_parse_variable(parser, scope);
+            
+//             // Reallocate parameters array to include the new parameter
+//             function_stmt->parameters_size++;
+//             function_stmt->parameters = realloc(function_stmt->parameters, 
+//                                                 function_stmt->parameters_size * sizeof(AST_T *));
+//             function_stmt->parameters[function_stmt->parameters_size - 1] = param;
+
+//             if (parser->current_token->type == TOKEN_COMMA) {
+//                 parser_eat(parser, TOKEN_COMMA);
+//             } else {
+//                 break;
+//             }
+//         } while (parser->current_token->type != TOKEN_RPAREN);
+//     }
+
+//     // Eat right parenthesis
+//     parser_eat(parser, TOKEN_RPAREN);
+
+//     // Check if function has a body or is terminated with ";"
+//     if (parser->current_token->type == TOKEN_LBRACE) {
+//         parser_eat(parser, TOKEN_LBRACE);
+//         function_stmt->function_body = parser_parse_statements(parser, scope);
+//         parser_eat(parser, TOKEN_RBRACE);
+//     } else {
+//         parser_eat(parser, TOKEN_SEMI);
+//         function_stmt->function_body = NULL;
+//     }
+
+//     function_stmt->scope = scope;
+//     return function_stmt;
+// }
+
+
+
+
 
 #endif
