@@ -26,7 +26,7 @@ typedef struct AST_STRUCT
         AST_INPUT,  // INPUT
         AST_NOOP,   // NULL OPERATION
 
-        //
+        // Added
         // AST_BOOL_EXPRESSION,
         // AST_BOOL_TERM,
         // AST_BOOL_FACTOR,
@@ -135,7 +135,7 @@ typedef struct AST_STRUCT
     // int bool_literal_value;              // For true/false literals
     // struct AST_STRUCT *comparison;
 
-    // /* AST_REL_EXPRESSION */
+    /* AST_REL_EXPRESSION */
     // struct AST_STRUCT *rel_expr_left;
     // struct AST_STRUCT *rel_expr_right;
     // char *rel_operator; // "==" "!=" ">" "<" ">=" "<="
@@ -214,6 +214,12 @@ AST_T *init_ast(int type)
     // ast->is_not = 0;
     // ast->bool_literal_value = 0;
     // ast->comparison = (void *)0;
+
+    // Added
+    /* AST_REL_EXPRESSION */
+    // ast->rel_expr_left = (void *)0;
+    // ast->rel_expr_right = (void *)0;
+    // ast->rel_operator = (void *)0;
 
     return ast;
 }

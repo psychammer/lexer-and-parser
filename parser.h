@@ -213,7 +213,7 @@ AST_T *parser_parse_declaration(parser_T *parser, scope_T *scope)
 //     return left;
 // }
 
-// // <bool-term>
+// /* <bool-term> */
 // AST_T *parser_parse_bool_term(parser_T *parser, scope_T *scope)
 // {
 //     AST_T *node = parser_parse_bool_factor(parser, scope);
@@ -232,7 +232,7 @@ AST_T *parser_parse_declaration(parser_T *parser, scope_T *scope)
 //     return node;
 // }
 
-// // <bool-expression>
+// /* <bool-expression> */
 // AST_T *parser_parse_bool_expression(parser_T *parser, scope_T *scope)
 // {
 //     parser_eat(parser, TOKEN_LPAREN);
@@ -252,6 +252,26 @@ AST_T *parser_parse_declaration(parser_T *parser, scope_T *scope)
 //     }
 
 //     return node;
+// }
+
+// /* <rel-expression> */
+// AST_T *parser_parse_rel_expression(parser_T *parser, scope_T *scope)
+// {
+//     AST_T *left = parser_parse_rel_expression(parser, scope);
+//     if (parser->current_token != (void *)0 &&
+//         parser->current_token->type == TOKEN_OPERATOR)
+//     {
+//         AST_T *comparison = init_ast(AST_REL_EXPRESSION);
+//         comparison->rel_expr_left = left;
+//         comparison->rel_operator = parser->current_token->value;
+//         parser_eat(parser, TOKEN_OPERATOR);
+//         comparison->rel_expr_right = parser_parse_rel_expression(parser, scope);
+//         return comparison;
+//     }
+//     else
+//     {
+//         return left;
+//     }
 // }
 
 // <conditional-stmt>
