@@ -32,6 +32,10 @@ ParseTreeNode *parse_identifier();
 ParseTreeNode *parse_term();
 ParseTreeNode *parse_power();
 ParseTreeNode *parse_factor();
+ParseTreeNode *parse_conditional();
+ParseTreeNode *parse_bool_expression();
+ParseTreeNode *parse_bool_term();
+ParseTreeNode *parse_bool_factor();
 
 
 ParseTreeNode *parse_program();
@@ -82,6 +86,11 @@ ParseTreeNode *create_identifier_node();
 ParseTreeNode *create_term_node();
 ParseTreeNode *create_power_node();
 ParseTreeNode *create_factor_node();
+ParseTreeNode *create_conditional_node();
+ParseTreeNode *create_bool_expression_node();
+ParseTreeNode *create_bool_term_node();
+ParseTreeNode *create_bool_factor_node();
+
 
 
 ParseTreeNode *create_program_node();

@@ -48,13 +48,9 @@ int main() {
 // <program> ::= { <declaration> }
 ParseTreeNode *parse_program() {
     ParseTreeNode *node = create_program_node();
-    
     while (current_token < token_length && myTokens[current_token].type != TOKEN_EOF) {
         ParseTreeNode *statements = parse_statements();
         if (statements == NULL) {
-            // If not a valid declaration, synchronize and continue
-            fprintf(stderr, "Error: Invalid declaration at Line: %d\n", 
-                    myTokens[current_token].line);
             recover();
             continue;
         }
@@ -71,9 +67,6 @@ ParseTreeNode *parse_statements()
     while (current_token < token_length && myTokens[current_token].type != TOKEN_EOF) {
         ParseTreeNode *statement = parse_statement();
         if (statement == NULL) {
-            // If not a valid declaration, synchronize and continue
-            fprintf(stderr, "Error: Invalid declaration at Line: %d\n", 
-                    myTokens[current_token].line);
             recover();
             continue;
         }
@@ -85,22 +78,44 @@ ParseTreeNode *parse_statements()
 
 ParseTreeNode *parse_statement() {
     ParseTreeNode *node = create_statement_node();
-    
+
     // Return NULL if not a valid declaration start
     if (current_token >= token_length || 
-        (myTokens[current_token].type != TOKEN_ID)) 
+        (myTokens[current_token].type != TOKEN_ID) &&
+        (myTokens[current_token].type != TOKEN_IF)
+        ) 
         {
         return NULL;
     }
 
+    // TOKEN IF
     if (current_token + 1 < token_length && 
-        myTokens[current_token+1].type == TOKEN_OPERATOR){
-        
-        ParseTreeNode *assignment = parse_assignment();
-        add_child(node, assignment);
+        myTokens[current_token].type == TOKEN_IF){
 
+        ParseTreeNode *conditional = parse_conditional();
+        add_child(node, conditional);
+        if(!conditional){
+            fprintf(stderr, "Error: parsing conditional statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
         return node;
     }
+
+    // TOKEN ASSIGNMENT
+    if (current_token + 1 < token_length && 
+        myTokens[current_token].type == TOKEN_ID &&
+        myTokens[current_token+1].type == TOKEN_OPERATOR){
+        ParseTreeNode *assignment = parse_assignment();
+        add_child(node, assignment);
+        if(!assignment){
+            fprintf(stderr, "Error: parsing assignment statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+
+        return node;
+    } 
 
     return NULL;
 }
@@ -113,12 +128,17 @@ ParseTreeNode *parse_assignment() {
     ParseTreeNode *identifier_node = parse_identifier();
     add_child(node, identifier_node);
 
-    if(current_token < token_length && myTokens[current_token].type==TOKEN_OPERATOR && myTokens[current_token].value[0] == '=')
+    if(current_token < token_length && myTokens[current_token].type==TOKEN_OPERATOR && (myTokens[current_token].value[0] == '=' && myTokens[current_token].value[1] != '=' || (myTokens[current_token].value[0] != '=' && myTokens[current_token].value[1] == '=')) )
         add_child(node, (check_create_advance(TOKEN_OPERATOR, "Equals")));
     
     // Parse expression
     ParseTreeNode *expression = parse_exp();
     add_child(node, expression);
+    if(!expression){
+        // fprintf(stderr, "Error: parsing expression %d\n", 
+        //         myTokens[current_token].line);
+        return NULL;
+    }
 
     // Expect semicolon at end
     if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
@@ -126,7 +146,7 @@ ParseTreeNode *parse_assignment() {
     } else {
         fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
                 myTokens[current_token].line);
-        recover();
+        return NULL;
     }        
 
     return node;
@@ -140,7 +160,7 @@ ParseTreeNode *parse_identifier() {
         add_child(node, check_create_advance(TOKEN_ID, "IDENTIFIER"));
     } else {
         fprintf(stderr, "Error: Expected data type at line %d\n", myTokens[current_token].line);
-        recover();
+        return NULL;
     }
 
     return node;
@@ -152,8 +172,7 @@ ParseTreeNode *parse_exp() {
     // Parse the first term
     ParseTreeNode *term_node = parse_term();
     if (!term_node) {
-        fprintf(stderr, "Error: Expected term at Line: %d\n", myTokens[current_token].line);
-        recover();
+        // fprintf(stderr, "Error: Expected term at Line: %d\n", myTokens[current_token].line);
         return NULL;
     }
     add_child(node, term_node);
@@ -169,8 +188,7 @@ ParseTreeNode *parse_exp() {
         // Parse the next term
         term_node = parse_term();
         if (!term_node) {
-            fprintf(stderr, "Error: Expected term after operator at Line: %d\n", myTokens[current_token].line);
-            recover();
+            // fprintf(stderr, "Error: Expected term after operator at Line: %d\n", myTokens[current_token].line);
             return NULL;
         }
         add_child(node, term_node);
@@ -184,10 +202,9 @@ ParseTreeNode *parse_term() {
     ParseTreeNode *node = create_term_node();
 
     // Parse the first factor
-    ParseTreeNode *factor_node = parse_power();
+    ParseTreeNode *factor_node = parse_factor();
     if (!factor_node) {
-        fprintf(stderr, "Error: Expected factor at Line: %d\n", myTokens[current_token].line);
-        recover();
+        // fprintf(stderr, "Error: Expected factor at Line: %d\n", myTokens[current_token].line);
         return NULL;
     }
     add_child(node, factor_node);
@@ -201,43 +218,9 @@ ParseTreeNode *parse_term() {
         add_child(node, operator_node);
 
         // Parse the next factor
-        factor_node = parse_power();
-        if (!factor_node) {
-            fprintf(stderr, "Error: Expected factor after operator at Line: %d\n", myTokens[current_token].line);
-            recover();
-            return NULL;
-        }
-        add_child(node, factor_node);
-    }
-
-    return node;
-}
-
-ParseTreeNode *parse_power() {
-    ParseTreeNode *node = create_power_node();
-
-    // Parse the first factor
-    ParseTreeNode *factor_node = parse_factor();
-    if (!factor_node) {
-        fprintf(stderr, "Error: Expected factor at Line: %d\n", myTokens[current_token].line);
-        recover();
-        return NULL;
-    }
-    add_child(node, factor_node);
-
-    // Parse additional factors connected by "**"
-    while (current_token < token_length && 
-           (myTokens[current_token].type == TOKEN_OPERATOR) && 
-           (myTokens[current_token].value[0] == '*' && myTokens[current_token].value[1] == '*')) {
-        // Match the operator
-        ParseTreeNode *operator_node = check_create_advance(TOKEN_OPERATOR, "Operator");
-        add_child(node, operator_node);
-
-        // Parse the next factor
         factor_node = parse_factor();
         if (!factor_node) {
-            fprintf(stderr, "Error: Expected factor after operator at Line: %d\n", myTokens[current_token].line);
-            recover();
+            // fprintf(stderr, "Error: Expected factor after operator at Line: %d\n", myTokens[current_token].line);
             return NULL;
         }
         add_child(node, factor_node);
@@ -249,9 +232,39 @@ ParseTreeNode *parse_power() {
 ParseTreeNode *parse_factor() {
     ParseTreeNode *node = create_factor_node();
 
+    // Parse the first factor
+    ParseTreeNode *power_node = parse_power();
+    if (!power_node) {
+        // fprintf(stderr, "Error: Expected factor at Line: %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+    add_child(node, power_node);
+
+    // Parse additional factors connected by "**"
+    while (current_token < token_length && 
+           (myTokens[current_token].type == TOKEN_OPERATOR) && 
+           (myTokens[current_token].value[0] == '*' && myTokens[current_token].value[1] == '*')) {
+        // Match the operator
+        ParseTreeNode *operator_node = check_create_advance(TOKEN_OPERATOR, "Operator");
+        add_child(node, operator_node);
+
+        // Parse the next factor
+        power_node = parse_power();
+        if (!power_node) {
+            // fprintf(stderr, "Error: Expected factor after operator at Line: %d\n", myTokens[current_token].line);
+            return NULL;
+        }
+        add_child(node, power_node);
+    }
+
+    return node;
+}
+
+ParseTreeNode *parse_power() {
+    ParseTreeNode *node = create_power_node();
+
     if (current_token >= token_length) {
-        fprintf(stderr, "Error: Unexpected end of input at Line: %d\n", myTokens[current_token].line);
-        recover();
+        // fprintf(stderr, "Error: Unexpected end of input at Line: %d\n", myTokens[current_token].line);
         return NULL;
     }
 
@@ -261,8 +274,7 @@ ParseTreeNode *parse_factor() {
 
         ParseTreeNode *exp_node = parse_exp();
         if (!exp_node) {
-            fprintf(stderr, "Error: Expected expression inside parentheses at Line: %d\n", myTokens[current_token].line);
-            recover();
+            // fprintf(stderr, "Error: Expected expression inside parentheses at Line: %d\n", myTokens[current_token].line);
             return NULL;
         }
         add_child(node, exp_node);
@@ -270,8 +282,7 @@ ParseTreeNode *parse_factor() {
         if (current_token < token_length && myTokens[current_token].type == TOKEN_RPAREN) {
             add_child(node, check_create_advance(TOKEN_RPAREN, "Right Parenthesis"));
         } else {
-            fprintf(stderr, "Error: Expected closing parenthesis at Line: %d\n", myTokens[current_token].line);
-            recover();
+            // fprintf(stderr, "Error: Expected closing parenthesis at Line: %d\n", myTokens[current_token].line);
             return NULL;
         }
     }
@@ -287,12 +298,163 @@ ParseTreeNode *parse_factor() {
     else {
         fprintf(stderr, "Error: Unexpected token '%s' at Line: %d\n", 
                 myTokens[current_token].value, myTokens[current_token].line);
-        recover();
         return NULL;
     }
 
     return node;
 }
+
+
+// conditional statement
+ParseTreeNode *parse_conditional() {
+    ParseTreeNode *node = create_conditional_node();
+
+    // expect if token
+    add_child(node, (check_create_advance(TOKEN_IF, "If")));
+
+    // expect left parenthesis token
+    add_child(node, (check_create_advance(TOKEN_LPAREN, "Left parenthesis")));
+
+    // expect bool expression
+    ParseTreeNode *bool_expression_node = parse_bool_expression();
+    add_child(node, bool_expression_node);
+    if(!bool_expression_node){
+        fprintf(stderr, "Error: parsing expression %d\n", 
+        myTokens[current_token].line);
+        return NULL;
+    }
+
+    // expect a right parenthesis
+    add_child(node, (check_create_advance(TOKEN_RPAREN, "Right parenthesis")));
+
+
+    // expect semicolon at end
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    } else {
+        fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }   
+
+    return node;
+
+
+}
+
+// <bool-expression>
+ParseTreeNode *parse_bool_expression()
+{
+    ParseTreeNode  *node = create_bool_expression_node();
+
+    // Parse the first factor
+    ParseTreeNode *bool_term_node = parse_bool_term();
+    if (!bool_term_node) {
+        // fprintf(stderr, "Error: Expected factor at Line: %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+    add_child(node, bool_term_node);
+
+    while(current_token < token_length && 
+           (myTokens[current_token].type == TOKEN_OPERATOR) && 
+           (myTokens[current_token].value[0] == 'o' && myTokens[current_token].value[1] == 'r'))
+    {
+        // Match the operator
+        ParseTreeNode *operator_node =  check_create_advance(TOKEN_OPERATOR, "Or");
+        add_child(node, operator_node);
+
+        // Parse the next term
+        bool_term_node = parse_bool_term();
+        if (!bool_term_node) {
+            // fprintf(stderr, "Error: Expected term after operator at Line: %d\n", myTokens[current_token].line);
+            return NULL;
+        }
+        add_child(node, bool_term_node);
+    }
+
+    return node;
+}
+
+// <bool-term>
+ParseTreeNode *parse_bool_term()
+{
+    ParseTreeNode  *node = create_bool_term_node();
+
+    // Parse the first factor
+    ParseTreeNode *bool_factor_node = parse_bool_factor();
+    add_child(node, bool_factor_node);
+    if (!bool_factor_node) {
+        // fprintf(stderr, "Error: Expected factor at Line: %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+
+    while(current_token < token_length && 
+           (myTokens[current_token].type == TOKEN_OPERATOR) && 
+           (myTokens[current_token].value[0] == 'a' && myTokens[current_token].value[1] == 'n' && myTokens[current_token].value[2] == 'd'))
+    {
+        // Match the operator
+        ParseTreeNode *operator_node =  check_create_advance(TOKEN_OPERATOR, "And");
+        add_child(node, operator_node);
+
+        // Parse the next factor
+        bool_factor_node = parse_bool_factor();
+        if (!bool_factor_node) {
+            // fprintf(stderr, "Error: Expected factor after operator at Line: %d\n", myTokens[current_token].line);
+            return NULL;
+        }
+        add_child(node, bool_factor_node);
+    }
+
+    return node;
+}
+
+// <bool-factor>
+ParseTreeNode *parse_bool_factor()
+{
+    ParseTreeNode  *node = create_bool_factor_node();
+
+    if (current_token >= token_length) {
+        // fprintf(stderr, "Error: Unexpected end of input at Line: %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+
+    // Check for "(" <expression> ")"
+    if (myTokens[current_token].type == TOKEN_LPAREN) {
+        add_child(node, check_create_advance(TOKEN_LPAREN, "Left Parenthesis"));
+
+        ParseTreeNode *bool_expression_node = parse_bool_expression();
+        if (!bool_expression_node) {
+            // fprintf(stderr, "Error: Expected expression inside parentheses at Line: %d\n", myTokens[current_token].line);
+            return NULL;
+        }
+        add_child(node, bool_expression_node);
+
+        if (current_token < token_length && myTokens[current_token].type == TOKEN_RPAREN) {
+            add_child(node, check_create_advance(TOKEN_RPAREN, "Right Parenthesis"));
+        } else {
+            // fprintf(stderr, "Error: Expected closing parenthesis at Line: %d\n", myTokens[current_token].line);
+            return NULL;
+        }
+    }
+    // Check for a number
+    else if (myTokens[current_token].type == TOKEN_NUMBER) {
+        add_child(node, check_create_advance(TOKEN_NUMBER, "Number"));
+    }
+    // Check for an identifier
+    else if (myTokens[current_token].type == TOKEN_ID) {
+        add_child(node, check_create_advance(TOKEN_ID, "Identifier"));
+    }
+    // Unexpected token
+    else {
+        fprintf(stderr, "Error: Unexpected token '%s' at Line: %d\n", 
+                myTokens[current_token].value, myTokens[current_token].line);
+        return NULL;
+    }
+
+    return node;
+}
+
+
 
 
 // Implement create functions for each non-terminal
@@ -332,6 +494,22 @@ ParseTreeNode *create_factor_node() {
     return create_node("Factor");
 }
 
+ParseTreeNode *create_conditional_node() {
+    return create_node("Conditional");
+}
+
+ParseTreeNode *create_bool_expression_node() {
+    return create_node("Bool Expression");
+}
+
+ParseTreeNode *create_bool_term_node() {
+    return create_node("Bool Term");
+}
+
+ParseTreeNode *create_bool_factor_node() {
+    return create_node("Bool Factor");
+}
+
 // Function to allocate and initialize a new ParseTreeNode
 ParseTreeNode *create_node(const char *name) {
     ParseTreeNode *node = malloc(sizeof(ParseTreeNode));
@@ -364,7 +542,7 @@ ParseTreeNode *check_create_advance(TokenType type, const char* node_name) {
     if (current_token < token_length && myTokens[current_token].type == type) {
         current_token++;
     } else {
-        printf("Unexpected token %d\n", type);
+        printf("Unexpected token %s\n", getTokenType(type));
         recover();
     }
     return node;
@@ -377,7 +555,7 @@ void recover() {
 
         // checkpoint to be deleted
         if (myTokens[current_token].type == TOKEN_SEMI){
-            current_token++;
+            current_token++;            
             return;
         }
 
@@ -388,6 +566,9 @@ void recover() {
             myTokens[current_token].type == TOKEN_FOR ||
             myTokens[current_token].type == TOKEN_WHILE ||
             myTokens[current_token].type == TOKEN_IF) {
+                
+            // checkpoint to be deleted
+            current_token++;
             return;
         }
         current_token++;
@@ -538,42 +719,43 @@ char* getTokenType(int tokenTypeInt) {
 token *get_tokens(const char *filename) {
     FILE *fp;
     char line[256];
-    token myToken;
+    int token_capacity = 1;
 
-    fp = fopen(filename, "r"); // Replace "tokens.txt" with the actual file name
-
+    fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Error: Could not open file.\n");
-        return (void*)0;
+        return NULL;
     }
 
-    token *token_list = NULL; 
-
-    token_list = (token *)calloc(1, sizeof(token));
+    // Allocate initial memory for token list
+    token *token_list = (token *)malloc(token_capacity * sizeof(token));
     if (token_list == NULL) {
         perror("Memory allocation failed");
         fclose(fp);
-        return (void*)0;
+        return NULL;
     }
 
+    // Skip header lines
+    fgets(line, sizeof(line), fp);
+    fgets(line, sizeof(line), fp);
 
-    fgets(line, sizeof(line), fp); // Skip the header line
-    fgets(line, sizeof(line), fp); // Skip the header line
-
-    token_length = 0;
-    int token_capacity = 1;
     while (fgets(line, sizeof(line), fp) != NULL) {
-        if(token_length>=1){
+        // Ensure capacity before adding a new token
+        if (token_length >= token_capacity) {
             token_capacity *= 2;
-            token_list = (token *)realloc(token_list, token_capacity*sizeof(token));
+            token *temp = (token *)realloc(token_list, token_capacity * sizeof(token));
+            if (temp == NULL) {
+                perror("Memory reallocation failed");
+                free(token_list);
+                fclose(fp);
+                return NULL;
+            }
+            token_list = temp;
         }
 
-        // Parse the line using strtok
-        char *ptr = strtok(line, "|"); 
-
-        if (ptr != NULL) {
-            ptr = strtok(NULL, "|");
-        }
+        // Parse the line
+        char *ptr = strtok(line, "|");
+        if (ptr != NULL) ptr = strtok(NULL, "|");  // Skip token name
 
         if (ptr != NULL) {
             token_list[token_length].type = atoi(ptr);
@@ -590,8 +772,6 @@ token *get_tokens(const char *filename) {
             token_list[token_length].line = atoi(ptr);
         }
 
-
-        // Print the extracted token information
         // printf("Token Code: %d\n", token_list[token_length].type);
         // printf("Token Value: %s\n", token_list[token_length].value);
         // printf("Token Line Number: %d\n\n", token_list[token_length].line);
@@ -599,10 +779,7 @@ token *get_tokens(const char *filename) {
         token_length++;
     }
 
-    // printf("%d\n", token_length);
-
     fclose(fp);
-
     return token_list;
 }
 
@@ -619,8 +796,6 @@ char *trim_whitespace(char *str) {
     end = str + strlen(str) - 1;
     while (end > str && isspace((unsigned char)*end)) end--;
 
-    // Write new null terminator
     *(end + 1) = '\0';
-
     return str;
 }

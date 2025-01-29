@@ -1,14 +1,5 @@
-age = 5 + 8 * 4**3 - 2 / 10**2;
+Grade = 1.0;
+score += 1;
+result = (x + 2) * z / (y ** 2 ) - 5;
 
-
-
-
-
-
-
-
-
-
-
-
-
+if(age and height);
