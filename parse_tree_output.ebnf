@@ -254,7 +254,27 @@ Program(
               TOKEN_OPERATOR: "or",
               Bool Term(
                 Bool Factor(
-                  TOKEN_ID: "height"
+                  Relational Expression(
+                    Expression(
+                      Term(
+                        Factor(
+                          Power(
+                            TOKEN_ID: "height"
+                          )
+                        )
+                      )
+                    ),
+                    TOKEN_OPERATOR: ">",
+                    Expression(
+                      Term(
+                        Factor(
+                          Power(
+                            TOKEN_NUMBER: "4"
+                          )
+                        )
+                      )
+                    )
+                  )
                 )
               )
             ),
@@ -332,26 +352,55 @@ Program(
       )
     ),
     Statement(
-      Return(
-        TOKEN_RETURN,
-        Expression(
-          Term(
-            Factor(
-              Power(
-                TOKEN_NUMBER: "5"
+      Function(
+        TOKEN_DATATYPE: "int",
+        Identifier(
+          TOKEN_ID: "sum"
+        ),
+        TOKEN_LPAREN,
+        Parameter list(
+          Datatype(
+            TOKEN_DATATYPE: "float"
+          ),
+          Identifier(
+            TOKEN_ID: "a"
+          ),
+          TOKEN_COMMA,
+          TOKEN_DATATYPE: "char",
+          Identifier(
+            TOKEN_ID: "abby"
+          )
+        ),
+        TOKEN_RPAREN,
+        Body(
+          TOKEN_LBRACE,
+          Statements(
+            Statement(
+              Return(
+                TOKEN_RETURN,
+                Expression(
+                  Term(
+                    Factor(
+                      Power(
+                        TOKEN_NUMBER: "5"
+                      )
+                    )
+                  ),
+                  TOKEN_OPERATOR: "+",
+                  Term(
+                    Factor(
+                      Power(
+                        TOKEN_NUMBER: "5"
+                      )
+                    )
+                  )
+                ),
+                TOKEN_SEMI
               )
             )
           ),
-          TOKEN_OPERATOR: "+",
-          Term(
-            Factor(
-              Power(
-                TOKEN_NUMBER: "5"
-              )
-            )
-          )
-        ),
-        TOKEN_SEMI
+          TOKEN_RBRACE
+        )
       )
     )
   )

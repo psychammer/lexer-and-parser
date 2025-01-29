@@ -84,7 +84,9 @@ ParseTreeNode *parse_statement() {
     if (current_token >= token_length || 
         (myTokens[current_token].type != TOKEN_ID) &&
         (myTokens[current_token].type != TOKEN_IF) &&
-        (myTokens[current_token].type != TOKEN_RETURN)
+        (myTokens[current_token].type != TOKEN_RETURN) &&
+        (myTokens[current_token].type != TOKEN_FUNCTION) &&
+        (myTokens[current_token].type != TOKEN_DATATYPE)
         ) 
         {
         return NULL;
@@ -140,6 +142,22 @@ ParseTreeNode *parse_statement() {
         ParseTreeNode *return_statement = parse_return_statement();
         add_child(node, return_statement);
         if(!return_statement){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+
+        return node;
+    } 
+
+    // TOKEN FUNCTION
+    if (current_token < token_length && 
+        myTokens[current_token].type == TOKEN_FUNCTION ||
+        myTokens[current_token].type == TOKEN_DATATYPE
+        ){
+        ParseTreeNode *function_statement = parse_function_statement();
+        add_child(node, function_statement);
+        if(!function_statement){
             fprintf(stderr, "Error: parsing output statement %d\n", 
                 myTokens[current_token].line);
             return NULL;
@@ -472,9 +490,18 @@ ParseTreeNode *parse_bool_factor()
         // fprintf(stderr, "Error: Unexpected end of input at Line: %d\n", myTokens[current_token].line);
         return NULL;
     }
-
+    if (myTokens[current_token].type == TOKEN_OPERATOR && strcmp(myTokens[current_token].value, "not") == 0) {
+        add_child(node, check_create_advance(TOKEN_OPERATOR, "Not"));
+        
+        ParseTreeNode *bool_factor_node = parse_bool_factor();
+        if (!bool_factor_node) {
+            fprintf(stderr, "Error: Expected boolean factor after 'not' at Line: %d\n", myTokens[current_token].line);
+            return NULL;
+        }
+        add_child(node, bool_factor_node);
+    }
     // Check for "(" <expression> ")"
-    if (myTokens[current_token].type == TOKEN_LPAREN) {
+    else if (myTokens[current_token].type == TOKEN_LPAREN) {
         add_child(node, check_create_advance(TOKEN_LPAREN, "Left Parenthesis"));
 
         ParseTreeNode *bool_expression_node = parse_bool_expression();
@@ -490,6 +517,16 @@ ParseTreeNode *parse_bool_factor()
             // fprintf(stderr, "Error: Expected closing parenthesis at Line: %d\n", myTokens[current_token].line);
             return NULL;
         }
+    }
+    else if (current_token < token_length && myTokens[current_token+1].type == TOKEN_OPERATOR &&
+        (strcmp(myTokens[current_token+1].value, "<")==0 ||
+        strcmp(myTokens[current_token+1].value, ">")==0 ||
+        strcmp(myTokens[current_token+1].value, "==")==0 ||
+        strcmp(myTokens[current_token+1].value, ">=")==0 ||
+        strcmp(myTokens[current_token+1].value, "<=")==0)
+        ) {
+        ParseTreeNode *rel_expression = parse_rel_expression();    
+        add_child(node, rel_expression);
     }
     // Check for a number
     else if (myTokens[current_token].type == TOKEN_NUMBER) {
@@ -508,6 +545,43 @@ ParseTreeNode *parse_bool_factor()
 
     return node;
 }
+
+
+ParseTreeNode *parse_rel_expression()
+{
+    ParseTreeNode *node = create_rel_expression_node();
+    
+    // Parse first expression
+    printf("here?");
+    ParseTreeNode *left_expr_node = parse_exp();
+    if (!left_expr_node) return NULL;
+    add_child(node, left_expr_node);
+    
+    // Match relational operator
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_OPERATOR &&
+        strcmp(myTokens[current_token].value, "<")==0 ||
+        strcmp(myTokens[current_token].value, ">")==0 ||
+        strcmp(myTokens[current_token].value, "==")==0 ||
+        strcmp(myTokens[current_token].value, ">=")==0 ||
+        strcmp(myTokens[current_token].value, "<=")==0 
+        )
+    {
+        ParseTreeNode *rel_op_node = check_create_advance(TOKEN_OPERATOR, myTokens[current_token].value);
+        add_child(node, rel_op_node);
+    }
+    else
+    {
+        return NULL; // Error: Expected relational operator
+    }
+    
+    // Parse second expression
+    ParseTreeNode *right_expr_node = parse_exp();
+    if (!right_expr_node) return NULL;
+    add_child(node, right_expr_node);
+    
+    return node;
+}
+
 
 //Output statement  [ADDED]
 // Parse print statement: "print" "(" <print-expression> ")" ";"
@@ -619,8 +693,99 @@ ParseTreeNode *parse_return_statement() {
     return node;
 }
 
+ParseTreeNode *parse_function_statement() {
+    ParseTreeNode *node = create_function_statement_node();
 
+    if(myTokens[current_token].type == TOKEN_FUNCTION){
+        // expect a function
+        add_child(node, check_create_advance(TOKEN_FUNCTION, "Function"));
+    }
+    else if(myTokens[current_token].type == TOKEN_DATATYPE){
+        // expect a token datatype
+        add_child(node, check_create_advance(TOKEN_DATATYPE, "Datatype"));
+    }
+    
+    // expect an identifier
+    ParseTreeNode *identifier = parse_identifier();
+    add_child(node, identifier);
 
+    // expect a left parenthesis
+    add_child(node, check_create_advance(TOKEN_LPAREN, "Left parenthesis"));
+
+    // expect a parameter list
+    ParseTreeNode *parameter_list = parse_parameter_list();
+    add_child(node, parameter_list);
+
+    add_child(node, check_create_advance(TOKEN_RPAREN, "Right_Parenthesis"));
+
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_LBRACE) {
+        ParseTreeNode *body = parse_body();
+        add_child(node, body);
+    } else if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    } else {
+        recover();
+    }
+    return node;
+
+}
+
+ParseTreeNode *parse_parameter_list() {
+    ParseTreeNode *node = create_parameter_list_node();
+
+    
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_RPAREN) {
+        // Empty parameter list
+    } else if (current_token < token_length && myTokens[current_token].type == TOKEN_DATATYPE && myTokens[current_token].value[0] == 'v') {
+            add_child(node, check_create_advance(TOKEN_VOID, "VOID"));
+    } else {
+        if (current_token < token_length && (myTokens[current_token].type == TOKEN_DATATYPE)) {
+            ParseTreeNode *datatype = parse_datatype();
+            add_child(node, datatype);
+
+            ParseTreeNode *identifier_node = parse_identifier();
+            add_child(node, identifier_node);
+
+            while (current_token < token_length && myTokens[current_token].type == TOKEN_COMMA) {
+                add_child(node, check_create_advance(TOKEN_COMMA, "Comma"));
+
+                if (current_token < token_length && (myTokens[current_token].type == TOKEN_DATATYPE)) {
+                    add_child(node, check_create_advance(TOKEN_DATATYPE, "Datatype"));
+
+                    ParseTreeNode *identifier_node = parse_identifier();
+                    add_child(node, identifier_node);
+
+                } else {
+                    fprintf(stderr, "Error: Expected data type after comma in parameter list at line %d\n", myTokens[current_token].line);
+                    recover();
+                }
+            }
+        } else {
+            fprintf(stderr, "Error: Expected data type or ')' at the start of parameter list at line %d\n", myTokens[current_token].line);
+            recover();
+        }
+    }
+    return node;
+}
+
+ParseTreeNode *parse_datatype() {
+    ParseTreeNode *node = create_datatype_node();
+    if (current_token < token_length) {
+        if (myTokens[current_token].value[0] == 'i') {
+            add_child(node, check_create_advance(TOKEN_DATATYPE, "Int"));
+        } else if (myTokens[current_token].value[0] == 'f') {
+            add_child(node, check_create_advance(TOKEN_DATATYPE, "float"));
+        } else if (myTokens[current_token].value[0] == 'c') {
+            add_child(node, check_create_advance(TOKEN_DATATYPE, "char"));
+        } else if (myTokens[current_token].value[0] == 'b') {
+            add_child(node, check_create_advance(TOKEN_DATATYPE, "bool"));
+        } else {
+            fprintf(stderr, "Error: Expected data type at line %d\n", myTokens[current_token].line);
+            recover();
+        }
+    }
+    return node;
+}
 
 ParseTreeNode *parse_body(){
     ParseTreeNode *node = create_body_node();
@@ -730,6 +895,26 @@ ParseTreeNode *create_else_node()
     return create_node("Else");
 }
 
+ParseTreeNode *create_function_statement_node()
+{
+    return create_node("Function");
+}
+
+ParseTreeNode *create_parameter_list_node()
+{
+    return create_node("Parameter list");
+}
+
+ParseTreeNode *create_datatype_node()
+{
+    return create_node("Datatype");
+}
+
+ParseTreeNode *create_rel_expression_node()
+{
+    return create_node("Relational Expression");
+}
+
 // Function to allocate and initialize a new ParseTreeNode
 ParseTreeNode *create_node(const char *name) {
     ParseTreeNode *node = malloc(sizeof(ParseTreeNode));
@@ -820,7 +1005,8 @@ void print_parse_tree(ParseTreeNode *node, int indent_level) {
         if (node->token->type == TOKEN_NUMBER ||
             node->token->type == TOKEN_ID ||
             node->token->type == TOKEN_STRING ||
-            node->token->type == TOKEN_OPERATOR) {
+            node->token->type == TOKEN_OPERATOR ||
+            node->token->type == TOKEN_DATATYPE) {
                 // Only have a single set of quotations for String literals
                 if (node->token->type == TOKEN_STRING) {
                     fprintf(output_file, "%s: %s", getTokenType(node->token->type), node->token->value);

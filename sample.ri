@@ -9,11 +9,15 @@ if(age and height){
     print(HEY + 5 + 2);
     print((x * y) / 2);
 }
-else if(age or height){
+else if(age or height > 4){
     grade = 5 + 5;
 }
 else{
     print(age + height);
 }
 
-return 5 + 5;
+int sum(float a, char abby){
+
+    return 5 + 5;
+
+}

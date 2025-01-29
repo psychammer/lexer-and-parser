@@ -41,6 +41,9 @@ ParseTreeNode *parse_body();
 ParseTreeNode *parse_output_statement(); 
 ParseTreeNode *parse_print_expression();  
 ParseTreeNode *parse_else();
+ParseTreeNode *parse_function_statement();
+ParseTreeNode *parse_datatype();
+ParseTreeNode *parse_rel_expression();
 
 ParseTreeNode *parse_program();
 ParseTreeNode *parse_declaration();
@@ -98,6 +101,9 @@ ParseTreeNode *create_body_node();
 ParseTreeNode *create_output_statement_node();
 ParseTreeNode *create_parse_print_expression_node(); 
 ParseTreeNode *create_else_node(); 
+ParseTreeNode *create_function_statement_node();
+ParseTreeNode *create_datatype_node();
+ParseTreeNode *create_rel_expression_node();
 
 
 ParseTreeNode *create_program_node();
