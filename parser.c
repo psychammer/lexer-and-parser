@@ -152,8 +152,9 @@ ParseTreeNode *parse_statement() {
 
     // TOKEN FUNCTION
     if (current_token < token_length && 
-        myTokens[current_token].type == TOKEN_FUNCTION ||
-        myTokens[current_token].type == TOKEN_DATATYPE
+        ((myTokens[current_token+1].type == TOKEN_FUNCTION &&
+        myTokens[current_token].type == TOKEN_DATATYPE)||
+        myTokens[current_token].type == TOKEN_FUNCTION)
         ){
         ParseTreeNode *function_statement = parse_function_statement();
         add_child(node, function_statement);
@@ -251,7 +252,7 @@ ParseTreeNode *parse_term() {
     ParseTreeNode *node = create_term_node();
 
     // Parse the first factor
-    ParseTreeNode *factor_node = parse_factor();
+    ParseTreeNode *factor_node = parse_change();
     if (!factor_node) {
         // fprintf(stderr, "Error: Expected factor at Line: %d\n", myTokens[current_token].line);
         return NULL;
@@ -267,7 +268,7 @@ ParseTreeNode *parse_term() {
         add_child(node, operator_node);
 
         // Parse the next factor
-        factor_node = parse_factor();
+        factor_node = parse_change();
         if (!factor_node) {
             // fprintf(stderr, "Error: Expected factor after operator at Line: %d\n", myTokens[current_token].line);
             return NULL;
@@ -278,7 +279,7 @@ ParseTreeNode *parse_term() {
     return node;
 }
 
-ParseTreeNode *parse_factor() {
+ParseTreeNode *parse_change() {
     ParseTreeNode *node = create_factor_node();
 
     // Parse the first factor
@@ -330,14 +331,19 @@ ParseTreeNode *parse_power() {
 
         if (current_token < token_length && myTokens[current_token].type == TOKEN_RPAREN) {
             add_child(node, check_create_advance(TOKEN_RPAREN, "Right Parenthesis"));
-        } else {
+        } 
+        // else if(current_token < token_length && myTokens[current_token].type == TOKEN_COMMA) {
+        //     add_child(node, check_create_advance(TOKEN_COMMA, "Comma"));
+        // } 
+        else {
             // fprintf(stderr, "Error: Expected closing parenthesis at Line: %d\n", myTokens[current_token].line);
             return NULL;
         }
     }
     // Check for a number
     else if (myTokens[current_token].type == TOKEN_NUMBER) {
-        add_child(node, check_create_advance(TOKEN_NUMBER, "Number"));
+        ParseTreeNode *constant = parse_constant();
+        add_child(node, constant);
     }
     // Check for an identifier
     else if (myTokens[current_token].type == TOKEN_ID) {
@@ -552,7 +558,6 @@ ParseTreeNode *parse_rel_expression()
     ParseTreeNode *node = create_rel_expression_node();
     
     // Parse first expression
-    printf("here?");
     ParseTreeNode *left_expr_node = parse_exp();
     if (!left_expr_node) return NULL;
     add_child(node, left_expr_node);
@@ -642,19 +647,20 @@ ParseTreeNode *parse_print_expression() {
     
     // Check for opening quote
     if (current_token < token_length && myTokens[current_token].type == TOKEN_STRING) {
-        add_child(node, check_create_advance(TOKEN_STRING, "String Quote"));
+        ParseTreeNode *string = parse_constant();
+        add_child(node, string);
     }
-    
+    else if(current_token < token_length && myTokens[current_token].type == TOKEN_ID && myTokens[current_token+1].type == TOKEN_LPAREN){
+        ParseTreeNode *function_call = parse_function_call();
+        add_child(node, function_call);
+    }
     // Parse expression
-    ParseTreeNode *expr = parse_exp();
-    if (!expr) {
-        return NULL;
-    }
-    add_child(node, expr);
-    
-    // Check for closing quote
-    if (current_token < token_length && myTokens[current_token].type == TOKEN_STRING) {
-        add_child(node, check_create_advance(TOKEN_STRING, "String Quote"));
+    else{
+        ParseTreeNode *expr = parse_exp();
+        if (!expr) {
+            return NULL;
+        }
+        add_child(node, expr);
     }
     
     // Check for comma and additional print expressions
@@ -703,6 +709,9 @@ ParseTreeNode *parse_function_statement() {
     else if(myTokens[current_token].type == TOKEN_DATATYPE){
         // expect a token datatype
         add_child(node, check_create_advance(TOKEN_DATATYPE, "Datatype"));
+
+        // // expect a function
+        add_child(node, check_create_advance(TOKEN_FUNCTION, "Function"));
     }
     
     // expect an identifier
@@ -728,6 +737,33 @@ ParseTreeNode *parse_function_statement() {
     }
     return node;
 
+}
+
+ParseTreeNode *parse_function_call()
+{
+    ParseTreeNode *node = create_function_call_node();
+
+    // Expect identifier
+    ParseTreeNode *identifier = parse_identifier();
+    add_child(node, identifier);
+
+    // expect a left parenthesis
+    add_child(node, check_create_advance(TOKEN_LPAREN, "Left parenthesis"));
+
+    // expect a expression
+    ParseTreeNode *expression = parse_exp();
+    add_child(node, expression);
+
+    while (myTokens[current_token].type == TOKEN_COMMA)
+    {
+        add_child(node, check_create_advance(TOKEN_COMMA, "Comma"));
+
+        expression = parse_exp();
+        add_child(node, expression);
+    }
+    add_child(node, check_create_advance(TOKEN_RPAREN, "Right_Parenthesis"));
+
+    return node;
 }
 
 ParseTreeNode *parse_parameter_list() {
@@ -816,6 +852,18 @@ ParseTreeNode *parse_body(){
 }
 
 
+ParseTreeNode *parse_constant(){
+    ParseTreeNode *node = create_constant_node();
+    
+    if(myTokens[current_token].type==TOKEN_STRING){
+        add_child(node, check_create_advance(TOKEN_STRING, "String"));
+    }
+    else if(myTokens[current_token].type==TOKEN_NUMBER){
+        add_child(node, check_create_advance(TOKEN_NUMBER, "Number"));
+    }
+
+    return node;
+}
 
 
 
@@ -913,6 +961,16 @@ ParseTreeNode *create_datatype_node()
 ParseTreeNode *create_rel_expression_node()
 {
     return create_node("Relational Expression");
+}
+
+ParseTreeNode *create_constant_node()
+{
+    return create_node("Constant");
+}
+
+ParseTreeNode * create_function_call_node()
+{
+    return create_node("Function Call");
 }
 
 // Function to allocate and initialize a new ParseTreeNode

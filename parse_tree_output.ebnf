@@ -10,7 +10,9 @@ Program(
           Term(
             Factor(
               Power(
-                TOKEN_NUMBER: "1.0"
+                Constant(
+                  TOKEN_NUMBER: "1.0"
+                )
               )
             )
           )
@@ -28,7 +30,9 @@ Program(
           Term(
             Factor(
               Power(
-                TOKEN_NUMBER: "1"
+                Constant(
+                  TOKEN_NUMBER: "1"
+                )
               )
             )
           )
@@ -59,7 +63,9 @@ Program(
                   Term(
                     Factor(
                       Power(
-                        TOKEN_NUMBER: "2"
+                        Constant(
+                          TOKEN_NUMBER: "2"
+                        )
                       )
                     )
                   )
@@ -85,7 +91,9 @@ Program(
                       ),
                       TOKEN_OPERATOR: "**",
                       Power(
-                        TOKEN_NUMBER: "2"
+                        Constant(
+                          TOKEN_NUMBER: "2"
+                        )
                       )
                     )
                   )
@@ -98,7 +106,9 @@ Program(
           Term(
             Factor(
               Power(
-                TOKEN_NUMBER: "5"
+                Constant(
+                  TOKEN_NUMBER: "5"
+                )
               )
             )
           )
@@ -135,7 +145,9 @@ Program(
                   Term(
                     Factor(
                       Power(
-                        TOKEN_NUMBER: "1.0"
+                        Constant(
+                          TOKEN_NUMBER: "1.0"
+                        )
                       )
                     )
                   )
@@ -153,7 +165,9 @@ Program(
                   Term(
                     Factor(
                       Power(
-                        TOKEN_NUMBER: "1"
+                        Constant(
+                          TOKEN_NUMBER: "1"
+                        )
                       )
                     )
                   )
@@ -178,7 +192,9 @@ Program(
                     Term(
                       Factor(
                         Power(
-                          TOKEN_NUMBER: "5"
+                          Constant(
+                            TOKEN_NUMBER: "5"
+                          )
                         )
                       )
                     ),
@@ -186,7 +202,9 @@ Program(
                     Term(
                       Factor(
                         Power(
-                          TOKEN_NUMBER: "2"
+                          Constant(
+                            TOKEN_NUMBER: "2"
+                          )
                         )
                       )
                     )
@@ -227,7 +245,9 @@ Program(
                       TOKEN_OPERATOR: "/",
                       Factor(
                         Power(
-                          TOKEN_NUMBER: "2"
+                          Constant(
+                            TOKEN_NUMBER: "2"
+                          )
                         )
                       )
                     )
@@ -269,7 +289,9 @@ Program(
                       Term(
                         Factor(
                           Power(
-                            TOKEN_NUMBER: "4"
+                            Constant(
+                              TOKEN_NUMBER: "4"
+                            )
                           )
                         )
                       )
@@ -292,7 +314,9 @@ Program(
                       Term(
                         Factor(
                           Power(
-                            TOKEN_NUMBER: "5"
+                            Constant(
+                              TOKEN_NUMBER: "5"
+                            )
                           )
                         )
                       ),
@@ -300,7 +324,9 @@ Program(
                       Term(
                         Factor(
                           Power(
-                            TOKEN_NUMBER: "5"
+                            Constant(
+                              TOKEN_NUMBER: "5"
+                            )
                           )
                         )
                       )
@@ -337,6 +363,67 @@ Program(
                               )
                             )
                           )
+                        ),
+                        TOKEN_COMMA,
+                        Print Expression(
+                          Constant(
+                            TOKEN_STRING: hello
+                          ),
+                          TOKEN_COMMA,
+                          Print Expression(
+                            Function Call(
+                              Identifier(
+                                TOKEN_ID: "add"
+                              ),
+                              TOKEN_LPAREN,
+                              Expression(
+                                Term(
+                                  Factor(
+                                    Power(
+                                      Constant(
+                                        TOKEN_NUMBER: "5"
+                                      )
+                                    )
+                                  )
+                                ),
+                                TOKEN_OPERATOR: "+",
+                                Term(
+                                  Factor(
+                                    Power(
+                                      Constant(
+                                        TOKEN_NUMBER: "5"
+                                      )
+                                    )
+                                  )
+                                )
+                              ),
+                              TOKEN_COMMA,
+                              Expression(
+                                Term(
+                                  Factor(
+                                    Power(
+                                      Constant(
+                                        TOKEN_NUMBER: "4"
+                                      )
+                                    )
+                                  )
+                                )
+                              ),
+                              TOKEN_COMMA,
+                              Expression(
+                                Term(
+                                  Factor(
+                                    Power(
+                                      Constant(
+                                        TOKEN_NUMBER: "2"
+                                      )
+                                    )
+                                  )
+                                )
+                              ),
+                              TOKEN_RPAREN
+                            )
+                          )
                         )
                       ),
                       TOKEN_RPAREN,
@@ -353,7 +440,7 @@ Program(
     ),
     Statement(
       Function(
-        TOKEN_DATATYPE: "int",
+        TOKEN_FUNCTION,
         Identifier(
           TOKEN_ID: "sum"
         ),
@@ -382,15 +469,35 @@ Program(
                   Term(
                     Factor(
                       Power(
-                        TOKEN_NUMBER: "5"
-                      )
-                    )
-                  ),
-                  TOKEN_OPERATOR: "+",
-                  Term(
-                    Factor(
+                        TOKEN_LPAREN,
+                        Expression(
+                          Term(
+                            Factor(
+                              Power(
+                                Constant(
+                                  TOKEN_NUMBER: "5"
+                                )
+                              )
+                            )
+                          ),
+                          TOKEN_OPERATOR: "+",
+                          Term(
+                            Factor(
+                              Power(
+                                Constant( dapat tlga kasi walang constant dun e, dpt nasa power na sea lahat.
+                                  TOKEN_NUMBER: "5"
+                                )
+                              )
+                            )
+                          )
+                        ),
+                        TOKEN_RPAREN
+                      ),
+                      TOKEN_OPERATOR: "**",
                       Power(
-                        TOKEN_NUMBER: "5"
+                        Constant(
+                          TOKEN_NUMBER: "2"
+                        )
                       )
                     )
                   )

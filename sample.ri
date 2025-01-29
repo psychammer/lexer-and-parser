@@ -13,11 +13,11 @@ else if(age or height > 4){
     grade = 5 + 5;
 }
 else{
-    print(age + height);
+    print(age + height, "hello", add(5+5, 4, 2));
 }
 
-int sum(float a, char abby){
+fun sum(float a, char abby){
 
-    return 5 + 5;
+    return (5 + 5)**2;
 
 }
