@@ -59,6 +59,10 @@ AST_T *parser_parse_number(parser_T *parser, scope_T *scope);
 
 AST_T *parser_parse_input_statement(parser_T *parser, scope_T *scope);
 
+//output statement
+AST_T* parser_parse_print_statement(parser_T* parser, scope_T* scope);
+AST_T* parser_parse_print_expression(parser_T* parser, scope_T* scope);
+
 // Added
 // AST_T *parser_parse_bool_expression(parser_T *parser, scope_T *scope);
 
@@ -362,42 +366,92 @@ AST_T *parser_parse_input_statement(parser_T *parser, scope_T *scope)
     return input_statement;
 }
 
-//<output-stmt>
-AST_T *parser_parse_output_statement(parser_T *parser, scope_T *scope)
+//<output-stmt> PRINT
+AST_T* parser_parse_print_statement(parser_T* parser, scope_T* scope)
 {
-    // Initialize output statement AST node
-    AST_T *output_statement = init_ast(AST_OUTPUT);
-    output_statement->scope = scope;
+    // Initialize print statement AST node
+    AST_T* print_statement = init_ast(AST_OUTPUT);
+    print_statement->scope = scope;
 
-    // Eat the "show" keyword
-    parser_eat(parser, TOKEN_KEYWORD); // "show"
+    // Eat the "print" keyword
+    parser_eat(parser, TOKEN_KEYWORD); // "print"
 
     // Eat left parenthesis
     parser_eat(parser, TOKEN_LPAREN);
 
     // Initialize array to store expressions
-    output_statement->output_expressions = calloc(1, sizeof(struct AST_STRUCT *));
-    output_statement->output_expressions_size = 0;
+    print_statement->output_expressions = calloc(1, sizeof(struct AST_STRUCT*));
+    print_statement->output_expressions_size = 0;
 
-    // Parse first expression
-    AST_T *expression = parser_parse_expression(parser, scope);
-    output_statement->output_expressions[0] = expression;
-    output_statement->output_expressions_size += 1;
+    // Parse first expression (could be string, function call, or other expression)
+    AST_T* expression = NULL;
+
+    if (parser->current_token->type == TOKEN_STRING) {
+        // Parse string literal
+        expression = parser_parse_string(parser, scope);
+    } 
+    else if (parser->current_token->type == TOKEN_ID) {
+        // Could be a function call or variable
+        char* id_name = parser->current_token->value;
+        parser_eat(parser, TOKEN_ID);
+
+        if (parser->current_token->type == TOKEN_LPAREN) {
+            // It's a function call
+            // Rewind parser position to before the ID
+            parser->current_token = parser->prev_token;
+            expression = parser_parse_function_call(parser, scope);
+        } else {
+            // It's a variable or other identifier
+            AST_T* var = init_ast(AST_VARIABLE);
+            var->variable_name = id_name;
+            var->scope = scope;
+            expression = var;
+        }
+    } 
+    else {
+        // Parse regular expression
+        expression = parser_parse_expression(parser, scope);
+    }
+
+    print_statement->output_expressions[0] = expression;
+    print_statement->output_expressions_size += 1;
 
     // Handle multiple expressions separated by commas
-    while (parser->current_token->type == TOKEN_COMMA)
-    {
+    while (parser->current_token->type == TOKEN_COMMA) {
         parser_eat(parser, TOKEN_COMMA);
 
         // Reallocate array to make space for new expression
-        output_statement->output_expressions_size += 1;
-        output_statement->output_expressions = realloc(
-            output_statement->output_expressions,
-            output_statement->output_expressions_size * sizeof(struct AST_STRUCT *));
+        print_statement->output_expressions_size += 1;
+        print_statement->output_expressions = realloc(
+            print_statement->output_expressions,
+            print_statement->output_expressions_size * sizeof(struct AST_STRUCT*)
+        );
 
-        // Parse next expression and add it to array
-        expression = parser_parse_expression(parser, scope);
-        output_statement->output_expressions[output_statement->output_expressions_size - 1] = expression;
+        // Parse next expression
+        if (parser->current_token->type == TOKEN_STRING) {
+            expression = parser_parse_string(parser, scope);
+        } 
+        else if (parser->current_token->type == TOKEN_ID) {
+            char* id_name = parser->current_token->value;
+            parser_eat(parser, TOKEN_ID);
+
+            if (parser->current_token->type == TOKEN_LPAREN) {
+                // It's a function call
+                parser->current_token = parser->prev_token;
+                expression = parser_parse_function_call(parser, scope);
+            } else {
+                // It's a variable
+                AST_T* var = init_ast(AST_VARIABLE);
+                var->variable_name = id_name;
+                var->scope = scope;
+                expression = var;
+            }
+        } 
+        else {
+            expression = parser_parse_expression(parser, scope);
+        }
+
+        print_statement->output_expressions[print_statement->output_expressions_size - 1] = expression;
     }
 
     // Eat right parenthesis
@@ -406,16 +460,7 @@ AST_T *parser_parse_output_statement(parser_T *parser, scope_T *scope)
     // Eat semicolon
     parser_eat(parser, TOKEN_SEMI);
 
-    return output_statement;
-}
-
-AST_T *parser_parse_keyword(parser_T *parser, scope_T *scope)
-{
-    if (parser->current_token->type == TOKEN_IF)
-    {
-        parser_eat(parser, TOKEN_KEYWORD);
-        parser_parse_conditional_statement(parser, scope);
-    }
+    return print_statement;
 }
 
 // <stmt>
