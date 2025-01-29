@@ -64,7 +64,8 @@ ParseTreeNode *parse_statements()
 {   
     ParseTreeNode *node = create_statements_node();
     
-    while (current_token < token_length && myTokens[current_token].type != TOKEN_EOF) {
+    // CHECKPOINT TO DELETE TOKEN_RBRACE
+    while (current_token < token_length && myTokens[current_token].type != TOKEN_EOF && myTokens[current_token].type != TOKEN_RBRACE) {
         ParseTreeNode *statement = parse_statement();
         if (statement == NULL) {
             recover();
@@ -82,7 +83,8 @@ ParseTreeNode *parse_statement() {
     // Return NULL if not a valid declaration start
     if (current_token >= token_length || 
         (myTokens[current_token].type != TOKEN_ID) &&
-        (myTokens[current_token].type != TOKEN_IF)
+        (myTokens[current_token].type != TOKEN_IF) &&
+        (myTokens[current_token].type != TOKEN_RETURN)
         ) 
         {
         return NULL;
@@ -110,6 +112,35 @@ ParseTreeNode *parse_statement() {
         add_child(node, assignment);
         if(!assignment){
             fprintf(stderr, "Error: parsing assignment statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+
+        return node;
+    } 
+
+    // TOKEN PRINT
+    if (current_token < token_length && 
+        myTokens[current_token].type == TOKEN_ID &&
+        strcmp(myTokens[current_token].value, "print")==0){
+        ParseTreeNode *output = parse_output_statement();
+        add_child(node, output);
+        if(!output){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+
+        return node;
+    } 
+
+    // TOKEN RETURN
+    if (current_token < token_length && 
+        myTokens[current_token].type == TOKEN_RETURN){
+        ParseTreeNode *return_statement = parse_return_statement();
+        add_child(node, return_statement);
+        if(!return_statement){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
                 myTokens[current_token].line);
             return NULL;
         }
@@ -328,17 +359,41 @@ ParseTreeNode *parse_conditional() {
     add_child(node, (check_create_advance(TOKEN_RPAREN, "Right parenthesis")));
 
 
+
+    ParseTreeNode *if_body = parse_body();
+    add_child(node, if_body);
+
+    while (current_token < token_length && myTokens[current_token].type == TOKEN_ELSE) {
+        ParseTreeNode *else_body = parse_else();
+        add_child(node, else_body);
+    }
+
+
     // expect semicolon at end
-    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
-        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
-    } else {
-        fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
-                myTokens[current_token].line);
-        return NULL;
-    }   
+    // if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+    //     add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    // } else {
+    //     fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d, current values is %s \n", 
+    //             myTokens[current_token].line, myTokens[current_token].value);
+    //     return NULL;
+    // }   
 
     return node;
 
+}
+
+ParseTreeNode *parse_else(){
+    ParseTreeNode *node = create_else_node();
+    add_child(node, check_create_advance(TOKEN_ELSE, "Else"));
+
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_IF) {
+        ParseTreeNode *if_statement = parse_conditional();
+        add_child(node, if_statement);
+    } else {
+        ParseTreeNode *else_block = parse_body();
+        add_child(node, else_block);
+    }
+    return node;
 
 }
 
@@ -454,6 +509,148 @@ ParseTreeNode *parse_bool_factor()
     return node;
 }
 
+//Output statement  [ADDED]
+// Parse print statement: "print" "(" <print-expression> ")" ";"
+ParseTreeNode *parse_output_statement() {
+    ParseTreeNode *node = create_output_statement_node();
+    
+    // Expect "print" keyword
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_ID) {
+        add_child(node, check_create_advance(TOKEN_ID, "Print"));
+    } else {
+        fprintf(stderr, "Error: Expected 'print' keyword at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }
+    
+    // Expect left parenthesis
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_LPAREN) {
+        add_child(node, check_create_advance(TOKEN_LPAREN, "Left Parenthesis"));
+    } else {
+        fprintf(stderr, "Error: Expected '(' after print at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }
+    
+    // Parse print expression
+    ParseTreeNode *print_expr = parse_print_expression();
+    if (!print_expr) {
+        fprintf(stderr, "Error: Invalid print expression at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }
+    add_child(node, print_expr);
+    
+    // Expect right parenthesis
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_RPAREN) {
+        add_child(node, check_create_advance(TOKEN_RPAREN, "Right Parenthesis"));
+    } else {
+        fprintf(stderr, "Error: Expected ')' after print expression at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }
+    
+    // Expect semicolon
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    } else {
+        fprintf(stderr, "Error: Expected ';' at end of print statement at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }
+    
+    return node;
+}
+
+// Parse print expression: ["] <expression> ["] [ "," <print-expression>]*  [ADDED]
+ParseTreeNode *parse_print_expression() {
+    ParseTreeNode *node = create_node("Print Expression");
+    
+    // Check for opening quote
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_STRING) {
+        add_child(node, check_create_advance(TOKEN_STRING, "String Quote"));
+    }
+    
+    // Parse expression
+    ParseTreeNode *expr = parse_exp();
+    if (!expr) {
+        return NULL;
+    }
+    add_child(node, expr);
+    
+    // Check for closing quote
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_STRING) {
+        add_child(node, check_create_advance(TOKEN_STRING, "String Quote"));
+    }
+    
+    // Check for comma and additional print expressions
+    while (current_token < token_length && myTokens[current_token].type == TOKEN_COMMA) {
+        add_child(node, check_create_advance(TOKEN_COMMA, "Comma"));
+        
+        ParseTreeNode *next_expr = parse_print_expression();
+        if (!next_expr) {
+            return NULL;
+        }
+        add_child(node, next_expr);
+    }
+    
+    return node;
+}
+
+
+
+ParseTreeNode *parse_return_statement() {
+    ParseTreeNode *node = create_return_statement_node();
+
+    // Expect "return" keyword
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_RETURN) {
+        add_child(node, check_create_advance(TOKEN_RETURN, "Return"));
+    } else {
+        fprintf(stderr, "Error: Expected 'print' keyword at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }
+
+    ParseTreeNode *expression = parse_exp();
+    add_child(node, expression);
+
+    add_child(node, check_create_advance(TOKEN_SEMI, "Semi"));
+    
+    return node;
+}
+
+
+
+
+ParseTreeNode *parse_body(){
+    ParseTreeNode *node = create_body_node();
+    add_child(node, check_create_advance(TOKEN_LBRACE, "Left Brace"));
+
+    while (current_token < token_length && myTokens[current_token].type != TOKEN_RBRACE) {
+        ParseTreeNode *statements = parse_statements();
+        if (statements != NULL) {
+            add_child(node, statements);
+        } else {
+            recover();
+            if (current_token >= token_length || 
+                myTokens[current_token].type == TOKEN_RBRACE) {
+                break;
+            }
+        }
+    }
+
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_RBRACE) {
+        add_child(node, check_create_advance(TOKEN_RBRACE, "Right_Brace"));
+    } else {
+        fprintf(stderr, "Error: Missing closing brace at line %d\n", 
+                myTokens[current_token-1].line);
+        recover();
+    }
+
+    return node;
+}
+
+
 
 
 
@@ -508,6 +705,29 @@ ParseTreeNode *create_bool_term_node() {
 
 ParseTreeNode *create_bool_factor_node() {
     return create_node("Bool Factor");
+}
+
+ParseTreeNode *create_body_node() {
+    return create_node("Body");
+}
+
+ParseTreeNode *create_output_statement_node() {
+    return create_node("Output");
+}
+
+ParseTreeNode *create_parse_print_expression_node()
+{
+    return create_node("Print");
+}
+
+ParseTreeNode *create_return_statement_node()
+{
+    return create_node("Return");
+}
+
+ParseTreeNode *create_else_node()
+{
+    return create_node("Else");
 }
 
 // Function to allocate and initialize a new ParseTreeNode
@@ -799,3 +1019,6 @@ char *trim_whitespace(char *str) {
     *(end + 1) = '\0';
     return str;
 }
+
+
+    

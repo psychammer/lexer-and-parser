@@ -2,4 +2,18 @@ Grade = 1.0;
 score += 1;
 result = (x + 2) * z / (y ** 2 ) - 5;
 
-if(age and height);
+if(age and height){
+
+    Grade = 1.0;
+    score += 1;
+    print(HEY + 5 + 2);
+    print((x * y) / 2);
+}
+else if(age or height){
+    grade = 5 + 5;
+}
+else{
+    print(age + height);
+}
+
+return 5 + 5;
