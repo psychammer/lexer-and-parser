@@ -32,7 +32,9 @@ AST_T *visitor_visit_assignment(visitor_T *visitor, AST_T *node);
 
 AST_T *visitor_visit_do_while(visitor_T *visitor, AST_T *node);
 
-// Added
+//Added
+// AST_T *visitor_visit_function_statement(visitor_T *visitor, AST_T *node);
+
 // AST_T *visitor_visit_bool_expression(visitor_T *visitor, AST_T *node);
 
 // AST_T *visitor_visit_bool_term(visitor_T *visitor, AST_T *node);
@@ -154,6 +156,12 @@ AST_T *visitor_visit(visitor_T *visitor, AST_T *node)
         return node;
         break;
 
+      // Added
+
+    //  case AST_FUNCTION_STATEMENT:
+    //      return visitor_visit_function_statement(visitor, node);
+    //      break;
+
         // Added
         // case AST_BOOL_EXPRESSION:
         //     return visitor_visit_bool_expression(visitor, node);
@@ -168,6 +176,9 @@ AST_T *visitor_visit(visitor_T *visitor, AST_T *node)
         //     return visitor_visit_rel_expression(visitor, node);
         //     break;
     }
+
+
+
 
     printf("Uncaught statement of type `%d`\n", node->type);
     exit(1);

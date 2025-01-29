@@ -25,6 +25,9 @@ typedef struct AST_STRUCT
         AST_OUTPUT, // OUTPUT
         AST_INPUT,  // INPUT
         AST_NOOP,   // NULL OPERATION
+        //Added
+        // AST_FUNCTION_STATEMENT, // FUNCTION STATEMENT
+        // AST_NODE_TYPE, // NODE TYPE
 
         //
         // AST_BOOL_EXPRESSION,
@@ -117,6 +120,20 @@ typedef struct AST_STRUCT
     /* AST_INPUT */
     struct AST_STRUCT *input_expression; // For input statements (add this)
     size_t input_expressions_size;
+
+
+
+    // Added
+    // struct AST_STRUCT *function_statement {
+    // AST_NODE_TYPE type;  
+    // char *function_name; // Function name
+    // AST_T **parameters;  // List of function parameters (dynamic array)
+    // size_t parameters_size;  // Number of parameters
+    // AST_T *function_body;  // Body of the function (if any)
+    // } AST_T;
+
+   
+    
 
     // Added
     // /* AST_BOOL_EXPRESSION */
