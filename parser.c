@@ -252,37 +252,6 @@ ParseTreeNode *parse_term() {
     ParseTreeNode *node = create_term_node();
 
     // Parse the first factor
-    ParseTreeNode *factor_node = parse_change();
-    if (!factor_node) {
-        // fprintf(stderr, "Error: Expected factor at Line: %d\n", myTokens[current_token].line);
-        return NULL;
-    }
-    add_child(node, factor_node);
-
-    // Parse additional factors connected by "*" or "/"
-    while (current_token < token_length && 
-           (myTokens[current_token].type == TOKEN_OPERATOR) && 
-           (myTokens[current_token].value[0] == '*' || myTokens[current_token].value[0] == '/')) {
-        // Match the operator
-        ParseTreeNode *operator_node = check_create_advance(TOKEN_OPERATOR, "Operator");
-        add_child(node, operator_node);
-
-        // Parse the next factor
-        factor_node = parse_change();
-        if (!factor_node) {
-            // fprintf(stderr, "Error: Expected factor after operator at Line: %d\n", myTokens[current_token].line);
-            return NULL;
-        }
-        add_child(node, factor_node);
-    }
-
-    return node;
-}
-
-ParseTreeNode *parse_change() {
-    ParseTreeNode *node = create_factor_node();
-
-    // Parse the first factor
     ParseTreeNode *power_node = parse_power();
     if (!power_node) {
         // fprintf(stderr, "Error: Expected factor at Line: %d\n", myTokens[current_token].line);
@@ -290,10 +259,10 @@ ParseTreeNode *parse_change() {
     }
     add_child(node, power_node);
 
-    // Parse additional factors connected by "**"
+    // Parse additional factors connected by "*" or "/"
     while (current_token < token_length && 
            (myTokens[current_token].type == TOKEN_OPERATOR) && 
-           (myTokens[current_token].value[0] == '*' && myTokens[current_token].value[1] == '*')) {
+           (myTokens[current_token].value[0] == '*' || myTokens[current_token].value[0] == '/')) {
         // Match the operator
         ParseTreeNode *operator_node = check_create_advance(TOKEN_OPERATOR, "Operator");
         add_child(node, operator_node);
@@ -312,6 +281,37 @@ ParseTreeNode *parse_change() {
 
 ParseTreeNode *parse_power() {
     ParseTreeNode *node = create_power_node();
+
+    // Parse the first factor
+    ParseTreeNode *factor_node = parse_factor();
+    if (!factor_node) {
+        // fprintf(stderr, "Error: Expected factor at Line: %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+    add_child(node, factor_node);
+
+    // Parse additional factors connected by "**"
+    while (current_token < token_length && 
+           (myTokens[current_token].type == TOKEN_OPERATOR) && 
+           (myTokens[current_token].value[0] == '*' && myTokens[current_token].value[1] == '*')) {
+        // Match the operator
+        ParseTreeNode *operator_node = check_create_advance(TOKEN_OPERATOR, "Operator");
+        add_child(node, operator_node);
+
+        // Parse the next factor
+        factor_node = parse_factor();
+        if (!factor_node) {
+            // fprintf(stderr, "Error: Expected factor after operator at Line: %d\n", myTokens[current_token].line);
+            return NULL;
+        }
+        add_child(node, factor_node);
+    }
+
+    return node;
+}
+
+ParseTreeNode *parse_factor() {
+    ParseTreeNode *node = create_factor_node();
 
     if (current_token >= token_length) {
         // fprintf(stderr, "Error: Unexpected end of input at Line: %d\n", myTokens[current_token].line);
