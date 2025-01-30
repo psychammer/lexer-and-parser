@@ -148,7 +148,7 @@ token* get_identifier_token(lexer* myLexer){
                             return token_init(TOKEN_RESERVEDWORDS, myToken->value);
                         }
                         else{
-                            state=-1; // more characters ahead, so maybe it's an id
+                            state=5; // more characters ahead, try as's'
                             break;
                         }
                     
@@ -177,6 +177,52 @@ token* get_identifier_token(lexer* myLexer){
                         }
                         else{
                             state=-1; // more characters ahead, so maybe it's an id
+                            break;
+                        }
+
+                    case 5: // check for as's'
+                        if(myLexer->current_char=='s'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=6; // now check for ass'e'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 6: // check for ass'e'
+                        if(myLexer->current_char=='e'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=7; // now check for asse'r'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 7: // check for asse'r'
+                        if(myLexer->current_char=='r'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=9; // now check for asser't'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 9: // check for asser't'
+                        if(myLexer->current_char=='t'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            if(isalnum(myLexer->current_char)==0 && myLexer->current_char!='_'){
+                                return token_init(TOKEN_RESERVEDWORDS, myToken->value);
+                            }
+                            else{
+                                state=-1; // more characters ahead, so maybe it's an id
+                                break;
+                            }
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
                             break;
                         }
 
@@ -461,7 +507,7 @@ token* get_identifier_token(lexer* myLexer){
                             break;
                         }
                         else{
-                            state=-1; // no more keywords left, so maybe it's an id
+                            state=21; // check for c'l'
                             break;
                         }
 
@@ -509,6 +555,63 @@ token* get_identifier_token(lexer* myLexer){
                             state=-1; // more characters ahead, so maybe it's an id
                             break;
                         }
+
+                    case 21:
+                        // check for c'l'
+                        if(myLexer->current_char=='l'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=22; // now check for cl'a'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+
+                    case 22:
+                        // check for cl'a'
+                        if(myLexer->current_char=='a'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=23; // now check for cla's'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+
+                    case 23:
+                        // check for cla's'
+                        if(myLexer->current_char=='s'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=24; // now check for clas's'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+
+                    case 24:
+                        // check for clas's'
+                        if(myLexer->current_char=='s'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=25; // now check for class only
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 25:
+                        if(isalnum(myLexer->current_char)==0 && myLexer->current_char!='_'){
+                            return token_init(TOKEN_RESERVEDWORDS, myToken->value);
+                        }
+                        else{
+                            state=-1; // more characters ahead, so maybe it's an id
+                            break;
+                        }
+                        
 
 
                     default:
@@ -597,8 +700,8 @@ token* get_identifier_token(lexer* myLexer){
                             break;
                         }
 
-                    case 7: // check for de'f'
-                        if(myLexer->current_char=='f'){
+                    case 7: // check for de'f' or de'l'
+                        if(myLexer->current_char=='f' || myLexer->current_char=='l'){
                             realloc_token_value_then_advance(myToken, myLexer);
                             state=8; // now check if it still has remaining charac
                             break;
@@ -1130,7 +1233,7 @@ token* get_identifier_token(lexer* myLexer){
                             break;
                         }
                         else{
-                            state=-1; // no more keywords left, so maybe it's an id
+                            state=8; // no more keywords left, so maybe it's an id
                             break;
                         }
                     case 5: // 
@@ -1159,6 +1262,68 @@ token* get_identifier_token(lexer* myLexer){
                             state=-1; // if there is still more charac after in, try checking int
                             break;
                         }
+
+
+                    case 8: // check for i'm'
+                        if(myLexer->current_char=='m'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=9; // now check for im'p'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 9: // check for im'p'
+                        if(myLexer->current_char=='p'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=10; // imp'o'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 10: // check for imp'o'
+                        if(myLexer->current_char=='o'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=11; // impo'r'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 11: // check for impo'r'
+                        if(myLexer->current_char=='r'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=12; // impor't'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 12: // check for impor't'
+                        if(myLexer->current_char=='t'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=13; // now check if it still has remaining charac
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 13:
+                        if(isalnum(myLexer->current_char)==0 && myLexer->current_char!='_'){
+                            return token_init(TOKEN_RESERVEDWORDS, myToken->value);
+                        }
+                        else{
+                            state=6; // if there is still more charac after in, try checking int
+                            break;
+                        }
+                    
+
         
 
                     default:

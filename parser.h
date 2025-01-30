@@ -58,6 +58,7 @@ ParseTreeNode *parse_ident_list();
 ParseTreeNode *parse_dec_assign();
 ParseTreeNode *parse_array();
 ParseTreeNode *parse_variable_stmt();
+ParseTreeNode *parse_declaration_stmt();
 
 ParseTreeNode *parse_program();
 ParseTreeNode *parse_declaration();

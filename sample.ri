@@ -1,44 +1,47 @@
-Grade = 1.0;
-score += 1;
-result = (x + 2) * z / (y ** 2 ) - 5;
+print("Welcome to the program!"); 
+print("Result: ", a + b, 30); 
+print((x * y) / 2, max(10, 20)); 
 
-if(age and height){
+Grade = 1.0; 
+score += 1; 
+result = (x + 2) * z / (y ** 2 ) - 5 ;
 
-    Grade = 1.0;
-    score += 1;
-    print(HEY + 5 + 2);
-    print((x * y) / 2);
+fun greetUser() {print("Hello user, welcome!"); } 
 
-}
-else if(age or height > 4){
-    grade = 5 + 5;
-}
-else{
-    print(age + height, "hello", add(5+5, 4, 2));
-}
+if (height == 2.1) { print("tall"); }
 
-fun sum(float a, char abby){
+if (height >= 2.1) {print("tall"); } else {print("short");}
 
-    return (5 + 4)**2;
-}
+if (height >= 2.1) { print("tall"); }
+         else if (height <=  1.65) { print("short"); }
+         else{ print("average"); }
 
-for(i = 0; i < 4; i++){
-    for(int j = 1; j < i; j++){
 
-    }
+for (int i = 0; i < 5; i++) { 
+    print(i);
 }
 
-do{
-    print("hi");
-}
-while(i < 4){
-    return 5;
+while (x > 0) {
+    print(x);
+    x -= 1;
 }
 
-age, hello = input("Enter your age: ");
+do { 
+    myNumber /= 2;
+} 
+while (myNumber > 0);
 
-int age = 5+4;
 
-int students[5][2] = {4, 2, 1};
+int score = 10; 
 
-int variabs;
+int result = 5 + a; 
+
+int fun add(int a, int b) {return a + b; } 
+
+int number[5];
+
+name = input("Enter your name: ");
+
+age = input("Enter your age: ");
+
+city = input("Enter your city: ");

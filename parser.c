@@ -176,66 +176,29 @@ ParseTreeNode *parse_statement() {
         return node;
     } 
 
-    // <function-stmt>
-    if (current_token < token_length && 
-        ((myTokens[current_token+1].type == TOKEN_FUNCTION &&
-        myTokens[current_token].type == TOKEN_DATATYPE)||
-        myTokens[current_token].type == TOKEN_FUNCTION)
-        ){
-        ParseTreeNode *function_statement = parse_function_statement();
-        add_child(node, function_statement);
-        if(!function_statement){
-            fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
-            return NULL;
-        }
-
-        return node;
-    }
-    // <variable-stmt>
-    else if(current_token < token_length && 
-        (myTokens[current_token].type == TOKEN_DATATYPE) && (myTokens[current_token+1].type == TOKEN_ID) && (myTokens[current_token+2].type == TOKEN_SEMI)){
-            ParseTreeNode *variable_stmt = parse_variable_stmt();
-            add_child(node, variable_stmt);
-            if(!variable_stmt){
-                fprintf(stderr, "Error: parsing output statement %d\n", 
-                    myTokens[current_token].line);
-                return NULL;
-            }
-            return node;
-    }
-    // <dec-assign-stmt>
-    else if(current_token < token_length && 
-        (myTokens[current_token].type == TOKEN_DATATYPE) && (myTokens[current_token+1].type == TOKEN_ID) && (myTokens[current_token+2].type == TOKEN_OPERATOR) &&(strcmp(myTokens[current_token+3].value, "input")!=0)){
-        ParseTreeNode *dec_assign = parse_dec_assign();
-        add_child(node, dec_assign);
-        if(!dec_assign){
-            fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
-            return NULL;
-        }
-        return node;
-    }
-    // <array-stmt>
-    else if(current_token < token_length && 
-        (myTokens[current_token].type == TOKEN_DATATYPE) && (myTokens[current_token+2].type == TOKEN_LBRACKET)){
-        ParseTreeNode *array = parse_array();
-        add_child(node, array);
-        if(!array){
-            fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
-            return NULL;
-        }
-        return node;
-    }
+    
     // TOKEN INPUT (with datatype)
-    else if(current_token < token_length && 
+    if(current_token < token_length && 
         (myTokens[current_token].type == TOKEN_DATATYPE) && (strcmp(myTokens[current_token+2].value, "input")==0 || myTokens[current_token+1].type == TOKEN_COMMA)
         ){
 
         ParseTreeNode *input_statement = parse_input_statement();
         add_child(node, input_statement);
         if(!input_statement){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+        return node;
+    }
+    else if(current_token < token_length && (myTokens[current_token].type == TOKEN_DATATYPE) ||
+            ((myTokens[current_token+1].type == TOKEN_FUNCTION &&
+        myTokens[current_token].type == TOKEN_DATATYPE)||
+        myTokens[current_token].type == TOKEN_FUNCTION)){
+
+        ParseTreeNode *declaration_stmt = parse_declaration_stmt();
+        add_child(node, declaration_stmt);
+        if(!declaration_stmt){
             fprintf(stderr, "Error: parsing output statement %d\n", 
                 myTokens[current_token].line);
             return NULL;
@@ -473,6 +436,7 @@ ParseTreeNode *parse_conditional() {
     if(!bool_expression_node){
         fprintf(stderr, "Error: parsing expression %d\n", 
         myTokens[current_token].line);
+        recover();
         return NULL;
     }
 
@@ -483,11 +447,24 @@ ParseTreeNode *parse_conditional() {
 
     ParseTreeNode *if_body = parse_body();
     add_child(node, if_body);
+    if(!if_body){
+            fprintf(stderr, "Error: parsing expression %d\n", 
+            myTokens[current_token].line);
+            recover();
+            return NULL;
+    }
 
     while (current_token < token_length && myTokens[current_token].type == TOKEN_ELSE) {
         ParseTreeNode *else_body = parse_else();
         add_child(node, else_body);
+        if(!else_body){
+            fprintf(stderr, "Error: parsing expression %d\n", 
+            myTokens[current_token].line);
+            return NULL;
+        }
     }
+
+    
 
 
     // expect semicolon at end
@@ -509,9 +486,21 @@ ParseTreeNode *parse_else(){
 
     if (current_token < token_length && myTokens[current_token].type == TOKEN_IF) {
         ParseTreeNode *if_statement = parse_conditional();
+        if(!if_statement){
+            fprintf(stderr, "Error: parsing expression %d\n", 
+            myTokens[current_token].line);
+            recover();
+            return NULL;
+        }
         add_child(node, if_statement);
     } else {
         ParseTreeNode *else_block = parse_body();
+        if(!else_block){
+            fprintf(stderr, "Error: parsing expression %d\n", 
+            myTokens[current_token].line);
+            recover();
+            return NULL;
+        }
         add_child(node, else_block);
     }
     return node;
@@ -925,7 +914,10 @@ ParseTreeNode *parse_do_while_body() {
 
     add_child(node, parse_body());
     add_child(node, check_create_advance(TOKEN_WHILE, "while"));
-    parse_while_body(node);
+    add_child(node, check_create_advance(TOKEN_LPAREN, "("));
+    add_child(node, parse_bool_expression());
+    add_child(node, check_create_advance(TOKEN_RPAREN, ")"));
+    add_child(node, check_create_advance(TOKEN_SEMI, ";"));
 
     return node;
 }
@@ -1195,14 +1187,58 @@ ParseTreeNode *parse_variable_stmt(){
 ParseTreeNode *parse_declaration_stmt(){
     ParseTreeNode *node = create_node("Declaration statement");
 
-    // Expect semicolon at end
-    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
-        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
-    } else {
-        fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
+    // <function-stmt>
+    if (current_token < token_length && 
+        ((myTokens[current_token+1].type == TOKEN_FUNCTION &&
+        myTokens[current_token].type == TOKEN_DATATYPE)||
+        myTokens[current_token].type == TOKEN_FUNCTION)
+        ){
+        ParseTreeNode *function_statement = parse_function_statement();
+        add_child(node, function_statement);
+        if(!function_statement){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
                 myTokens[current_token].line);
-        return NULL;
-    }     
+            return NULL;
+        }
+
+        return node;
+    }
+    // <variable-stmt>
+    else if(current_token < token_length && 
+        (myTokens[current_token].type == TOKEN_DATATYPE) && (myTokens[current_token+1].type == TOKEN_ID) && (myTokens[current_token+2].type == TOKEN_SEMI)){
+            ParseTreeNode *variable_stmt = parse_variable_stmt();
+            add_child(node, variable_stmt);
+            if(!variable_stmt){
+                fprintf(stderr, "Error: parsing output statement %d\n", 
+                    myTokens[current_token].line);
+                return NULL;
+            }
+            return node;
+    }
+    // <dec-assign-stmt>
+    else if(current_token < token_length && 
+        (myTokens[current_token].type == TOKEN_DATATYPE) && (myTokens[current_token+1].type == TOKEN_ID) && (myTokens[current_token+2].type == TOKEN_OPERATOR) &&(strcmp(myTokens[current_token+3].value, "input")!=0)){
+        ParseTreeNode *dec_assign = parse_dec_assign();
+        add_child(node, dec_assign);
+        if(!dec_assign){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+        return node;
+    }
+    // <array-stmt>
+    else if(current_token < token_length && 
+        (myTokens[current_token].type == TOKEN_DATATYPE) && (myTokens[current_token+2].type == TOKEN_LBRACKET)){
+        ParseTreeNode *array = parse_array();
+        add_child(node, array);
+        if(!array){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+        return node;
+    }
 
     return node;
 }
@@ -1514,7 +1550,7 @@ ParseTreeNode *check_create_advance(TokenType type, const char* node_name) {
     if (current_token < token_length && myTokens[current_token].type == type) {
         current_token++;
     } else {
-        printf("Unexpected token %s\n", getTokenType(type));
+        printf("Unexpected token %s at line %d \n", getTokenType(myTokens[current_token].type), myTokens[current_token].line);
         recover();
     }
     return node;
@@ -1537,7 +1573,9 @@ void recover() {
             myTokens[current_token].type == TOKEN_BOOL ||
             myTokens[current_token].type == TOKEN_FOR ||
             myTokens[current_token].type == TOKEN_WHILE ||
-            myTokens[current_token].type == TOKEN_IF) {
+            myTokens[current_token].type == TOKEN_IF ||
+            myTokens[current_token].type == TOKEN_ELSE
+            ) {
                 
             // checkpoint to be deleted
             current_token++;

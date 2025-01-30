@@ -1,6 +1,142 @@
 Program(
   Statements(
     Statement(
+      Output(
+        TOKEN_ID: "print",
+        TOKEN_LPAREN,
+        Print Expression(
+          Constant(
+            TOKEN_STRING: Welcome to the program!
+          )
+        ),
+        TOKEN_RPAREN,
+        TOKEN_SEMI
+      )
+    ),
+    Statement(
+      Output(
+        TOKEN_ID: "print",
+        TOKEN_LPAREN,
+        Print Expression(
+          Constant(
+            TOKEN_STRING: Result:
+          ),
+          TOKEN_COMMA,
+          Print Expression(
+            Expression(
+              Term(
+                Power(
+                  Factor(
+                    TOKEN_ID: "a"
+                  )
+                )
+              ),
+              TOKEN_OPERATOR: "+",
+              Term(
+                Power(
+                  Factor(
+                    TOKEN_ID: "b"
+                  )
+                )
+              )
+            ),
+            TOKEN_COMMA,
+            Print Expression(
+              Expression(
+                Term(
+                  Power(
+                    Factor(
+                      Constant(
+                        TOKEN_NUMBER: "30"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        ),
+        TOKEN_RPAREN,
+        TOKEN_SEMI
+      )
+    ),
+    Statement(
+      Output(
+        TOKEN_ID: "print",
+        TOKEN_LPAREN,
+        Print Expression(
+          Expression(
+            Term(
+              Power(
+                Factor(
+                  TOKEN_LPAREN,
+                  Expression(
+                    Term(
+                      Power(
+                        Factor(
+                          TOKEN_ID: "x"
+                        )
+                      ),
+                      TOKEN_OPERATOR: "*",
+                      Power(
+                        Factor(
+                          TOKEN_ID: "y"
+                        )
+                      )
+                    )
+                  ),
+                  TOKEN_RPAREN
+                )
+              ),
+              TOKEN_OPERATOR: "/",
+              Power(
+                Factor(
+                  Constant(
+                    TOKEN_NUMBER: "2"
+                  )
+                )
+              )
+            )
+          ),
+          TOKEN_COMMA,
+          Print Expression(
+            Function Call(
+              Identifier(
+                TOKEN_ID: "max"
+              ),
+              TOKEN_LPAREN,
+              Expression(
+                Term(
+                  Power(
+                    Factor(
+                      Constant(
+                        TOKEN_NUMBER: "10"
+                      )
+                    )
+                  )
+                )
+              ),
+              TOKEN_COMMA,
+              Expression(
+                Term(
+                  Power(
+                    Factor(
+                      Constant(
+                        TOKEN_NUMBER: "20"
+                      )
+                    )
+                  )
+                )
+              ),
+              TOKEN_RPAREN
+            )
+          )
+        ),
+        TOKEN_RPAREN,
+        TOKEN_SEMI
+      )
+    ),
+    Statement(
       Assignment(
         Identifier(
           TOKEN_ID: "Grade"
@@ -117,17 +253,67 @@ Program(
       TOKEN_SEMI
     ),
     Statement(
+      Declaration statement(
+        Function(
+          TOKEN_FUNCTION,
+          Identifier(
+            TOKEN_ID: "greetUser"
+          ),
+          TOKEN_LPAREN,
+          Parameter list(),
+          TOKEN_RPAREN,
+          Body(
+            TOKEN_LBRACE,
+            Statements(
+              Statement(
+                Output(
+                  TOKEN_ID: "print",
+                  TOKEN_LPAREN,
+                  Print Expression(
+                    Constant(
+                      TOKEN_STRING: Hello user, welcome!
+                    )
+                  ),
+                  TOKEN_RPAREN,
+                  TOKEN_SEMI
+                )
+              )
+            ),
+            TOKEN_RBRACE
+          )
+        )
+      )
+    ),
+    Statement(
       Conditional(
         TOKEN_IF,
         TOKEN_LPAREN,
         Bool Expression(
           Bool Term(
             Bool Factor(
-              TOKEN_ID: "age"
-            ),
-            TOKEN_OPERATOR: "and",
-            Bool Factor(
-              TOKEN_ID: "height"
+              Relational Expression(
+                Expression(
+                  Term(
+                    Power(
+                      Factor(
+                        TOKEN_ID: "height"
+                      )
+                    )
+                  )
+                ),
+                TOKEN_OPERATOR: "==",
+                Expression(
+                  Term(
+                    Power(
+                      Factor(
+                        Constant(
+                          TOKEN_NUMBER: "2.1"
+                        )
+                      )
+                    )
+                  )
+                )
+              )
             )
           )
         ),
@@ -136,121 +322,144 @@ Program(
           TOKEN_LBRACE,
           Statements(
             Statement(
-              Assignment(
-                Identifier(
-                  TOKEN_ID: "Grade"
-                ),
-                TOKEN_OPERATOR: "=",
-                Expression(
-                  Term(
-                    Power(
-                      Factor(
-                        Constant(
-                          TOKEN_NUMBER: "1.0"
-                        )
-                      )
-                    )
-                  )
-                )
-              ),
-              TOKEN_SEMI
-            ),
-            Statement(
-              Assignment(
-                Identifier(
-                  TOKEN_ID: "score"
-                ),
-                TOKEN_OPERATOR: "+=",
-                Expression(
-                  Term(
-                    Power(
-                      Factor(
-                        Constant(
-                          TOKEN_NUMBER: "1"
-                        )
-                      )
-                    )
-                  )
-                )
-              ),
-              TOKEN_SEMI
-            ),
-            Statement(
               Output(
                 TOKEN_ID: "print",
                 TOKEN_LPAREN,
                 Print Expression(
-                  Expression(
-                    Term(
-                      Power(
-                        Factor(
-                          TOKEN_ID: "HEY"
-                        )
-                      )
-                    ),
-                    TOKEN_OPERATOR: "+",
-                    Term(
-                      Power(
-                        Factor(
-                          Constant(
-                            TOKEN_NUMBER: "5"
-                          )
-                        )
-                      )
-                    ),
-                    TOKEN_OPERATOR: "+",
-                    Term(
-                      Power(
-                        Factor(
-                          Constant(
-                            TOKEN_NUMBER: "2"
-                          )
-                        )
-                      )
-                    )
+                  Constant(
+                    TOKEN_STRING: tall
                   )
                 ),
                 TOKEN_RPAREN,
                 TOKEN_SEMI
               )
-            ),
+            )
+          ),
+          TOKEN_RBRACE
+        )
+      )
+    ),
+    Statement(
+      Conditional(
+        TOKEN_IF,
+        TOKEN_LPAREN,
+        Bool Expression(
+          Bool Term(
+            Bool Factor(
+              Relational Expression(
+                Expression(
+                  Term(
+                    Power(
+                      Factor(
+                        TOKEN_ID: "height"
+                      )
+                    )
+                  )
+                ),
+                TOKEN_OPERATOR: ">=",
+                Expression(
+                  Term(
+                    Power(
+                      Factor(
+                        Constant(
+                          TOKEN_NUMBER: "2.1"
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        ),
+        TOKEN_RPAREN,
+        Body(
+          TOKEN_LBRACE,
+          Statements(
             Statement(
               Output(
                 TOKEN_ID: "print",
                 TOKEN_LPAREN,
                 Print Expression(
-                  Expression(
-                    Term(
-                      Power(
-                        Factor(
-                          TOKEN_LPAREN,
-                          Expression(
-                            Term(
-                              Power(
-                                Factor(
-                                  TOKEN_ID: "x"
-                                )
-                              ),
-                              TOKEN_OPERATOR: "*",
-                              Power(
-                                Factor(
-                                  TOKEN_ID: "y"
-                                )
-                              )
-                            )
-                          ),
-                          TOKEN_RPAREN
-                        )
-                      ),
-                      TOKEN_OPERATOR: "/",
-                      Power(
-                        Factor(
-                          Constant(
-                            TOKEN_NUMBER: "2"
-                          )
+                  Constant(
+                    TOKEN_STRING: tall
+                  )
+                ),
+                TOKEN_RPAREN,
+                TOKEN_SEMI
+              )
+            )
+          ),
+          TOKEN_RBRACE
+        ),
+        Else(
+          TOKEN_ELSE,
+          Body(
+            TOKEN_LBRACE,
+            Statements(
+              Statement(
+                Output(
+                  TOKEN_ID: "print",
+                  TOKEN_LPAREN,
+                  Print Expression(
+                    Constant(
+                      TOKEN_STRING: short
+                    )
+                  ),
+                  TOKEN_RPAREN,
+                  TOKEN_SEMI
+                )
+              )
+            ),
+            TOKEN_RBRACE
+          )
+        )
+      )
+    ),
+    Statement(
+      Conditional(
+        TOKEN_IF,
+        TOKEN_LPAREN,
+        Bool Expression(
+          Bool Term(
+            Bool Factor(
+              Relational Expression(
+                Expression(
+                  Term(
+                    Power(
+                      Factor(
+                        TOKEN_ID: "height"
+                      )
+                    )
+                  )
+                ),
+                TOKEN_OPERATOR: ">=",
+                Expression(
+                  Term(
+                    Power(
+                      Factor(
+                        Constant(
+                          TOKEN_NUMBER: "2.1"
                         )
                       )
                     )
+                  )
+                )
+              )
+            )
+          )
+        ),
+        TOKEN_RPAREN,
+        Body(
+          TOKEN_LBRACE,
+          Statements(
+            Statement(
+              Output(
+                TOKEN_ID: "print",
+                TOKEN_LPAREN,
+                Print Expression(
+                  Constant(
+                    TOKEN_STRING: tall
                   )
                 ),
                 TOKEN_RPAREN,
@@ -268,12 +477,6 @@ Program(
             Bool Expression(
               Bool Term(
                 Bool Factor(
-                  TOKEN_ID: "age"
-                )
-              ),
-              TOKEN_OPERATOR: "or",
-              Bool Term(
-                Bool Factor(
                   Relational Expression(
                     Expression(
                       Term(
@@ -284,13 +487,13 @@ Program(
                         )
                       )
                     ),
-                    TOKEN_OPERATOR: ">",
+                    TOKEN_OPERATOR: "<=",
                     Expression(
                       Term(
                         Power(
                           Factor(
                             Constant(
-                              TOKEN_NUMBER: "4"
+                              TOKEN_NUMBER: "1.65"
                             )
                           )
                         )
@@ -305,34 +508,17 @@ Program(
               TOKEN_LBRACE,
               Statements(
                 Statement(
-                  Assignment(
-                    Identifier(
-                      TOKEN_ID: "grade"
-                    ),
-                    TOKEN_OPERATOR: "=",
-                    Expression(
-                      Term(
-                        Power(
-                          Factor(
-                            Constant(
-                              TOKEN_NUMBER: "5"
-                            )
-                          )
-                        )
-                      ),
-                      TOKEN_OPERATOR: "+",
-                      Term(
-                        Power(
-                          Factor(
-                            Constant(
-                              TOKEN_NUMBER: "5"
-                            )
-                          )
-                        )
+                  Output(
+                    TOKEN_ID: "print",
+                    TOKEN_LPAREN,
+                    Print Expression(
+                      Constant(
+                        TOKEN_STRING: short
                       )
-                    )
-                  ),
-                  TOKEN_SEMI
+                    ),
+                    TOKEN_RPAREN,
+                    TOKEN_SEMI
+                  )
                 )
               ),
               TOKEN_RBRACE
@@ -347,83 +533,8 @@ Program(
                       TOKEN_ID: "print",
                       TOKEN_LPAREN,
                       Print Expression(
-                        Expression(
-                          Term(
-                            Power(
-                              Factor(
-                                TOKEN_ID: "age"
-                              )
-                            )
-                          ),
-                          TOKEN_OPERATOR: "+",
-                          Term(
-                            Power(
-                              Factor(
-                                TOKEN_ID: "height"
-                              )
-                            )
-                          )
-                        ),
-                        TOKEN_COMMA,
-                        Print Expression(
-                          Constant(
-                            TOKEN_STRING: hello
-                          ),
-                          TOKEN_COMMA,
-                          Print Expression(
-                            Function Call(
-                              Identifier(
-                                TOKEN_ID: "add"
-                              ),
-                              TOKEN_LPAREN,
-                              Expression(
-                                Term(
-                                  Power(
-                                    Factor(
-                                      Constant(
-                                        TOKEN_NUMBER: "5"
-                                      )
-                                    )
-                                  )
-                                ),
-                                TOKEN_OPERATOR: "+",
-                                Term(
-                                  Power(
-                                    Factor(
-                                      Constant(
-                                        TOKEN_NUMBER: "5"
-                                      )
-                                    )
-                                  )
-                                )
-                              ),
-                              TOKEN_COMMA,
-                              Expression(
-                                Term(
-                                  Power(
-                                    Factor(
-                                      Constant(
-                                        TOKEN_NUMBER: "4"
-                                      )
-                                    )
-                                  )
-                                )
-                              ),
-                              TOKEN_COMMA,
-                              Expression(
-                                Term(
-                                  Power(
-                                    Factor(
-                                      Constant(
-                                        TOKEN_NUMBER: "2"
-                                      )
-                                    )
-                                  )
-                                )
-                              ),
-                              TOKEN_RPAREN
-                            )
-                          )
+                        Constant(
+                          TOKEN_STRING: average
                         )
                       ),
                       TOKEN_RPAREN,
@@ -439,83 +550,14 @@ Program(
       )
     ),
     Statement(
-      Function(
-        TOKEN_FUNCTION,
-        Identifier(
-          TOKEN_ID: "sum"
-        ),
-        TOKEN_LPAREN,
-        Parameter list(
-          Datatype(
-            TOKEN_DATATYPE: "float"
-          ),
-          Identifier(
-            TOKEN_ID: "a"
-          ),
-          TOKEN_COMMA,
-          TOKEN_DATATYPE: "char",
-          Identifier(
-            TOKEN_ID: "abby"
-          )
-        ),
-        TOKEN_RPAREN,
-        Body(
-          TOKEN_LBRACE,
-          Statements(
-            Statement(
-              Return(
-                TOKEN_RETURN,
-                Expression(
-                  Term(
-                    Power(
-                      Factor(
-                        TOKEN_LPAREN,
-                        Expression(
-                          Term(
-                            Power(
-                              Factor(
-                                Constant(
-                                  TOKEN_NUMBER: "5"
-                                )
-                              )
-                            )
-                          ),
-                          TOKEN_OPERATOR: "+",
-                          Term(
-                            Power(
-                              Factor(
-                                Constant(
-                                  TOKEN_NUMBER: "4"
-                                )
-                              )
-                            )
-                          )
-                        ),
-                        TOKEN_RPAREN
-                      ),
-                      TOKEN_OPERATOR: "**",
-                      Factor(
-                        Constant(
-                          TOKEN_NUMBER: "2"
-                        )
-                      )
-                    )
-                  )
-                ),
-                TOKEN_SEMI
-              )
-            )
-          ),
-          TOKEN_RBRACE
-        )
-      )
-    ),
-    Statement(
       Iterative Statement(
         TOKEN_FOR,
         For Statement(
           TOKEN_LPAREN,
           Iterative Assignment statement(
+            Datatype(
+              TOKEN_DATATYPE: "int"
+            ),
             Identifier(
               TOKEN_ID: "i"
             ),
@@ -552,7 +594,7 @@ Program(
                       Power(
                         Factor(
                           Constant(
-                            TOKEN_NUMBER: "4"
+                            TOKEN_NUMBER: "5"
                           )
                         )
                       )
@@ -580,78 +622,106 @@ Program(
             TOKEN_LBRACE,
             Statements(
               Statement(
-                Iterative Statement(
-                  TOKEN_FOR,
-                  For Statement(
-                    TOKEN_LPAREN,
-                    Iterative Assignment statement(
-                      Datatype(
-                        TOKEN_DATATYPE: "int"
-                      ),
-                      Identifier(
-                        TOKEN_ID: "j"
-                      ),
-                      TOKEN_OPERATOR: "=",
-                      Expression(
-                        Term(
-                          Power(
-                            Factor(
-                              Constant(
-                                TOKEN_NUMBER: "1"
-                              )
-                            )
+                Output(
+                  TOKEN_ID: "print",
+                  TOKEN_LPAREN,
+                  Print Expression(
+                    Expression(
+                      Term(
+                        Power(
+                          Factor(
+                            TOKEN_ID: "i"
                           )
                         )
                       )
-                    ),
-                    TOKEN_SEMI,
-                    Bool Expression(
-                      Bool Term(
-                        Bool Factor(
-                          Relational Expression(
-                            Expression(
-                              Term(
-                                Power(
-                                  Factor(
-                                    TOKEN_ID: "j"
-                                  )
-                                )
-                              )
-                            ),
-                            TOKEN_OPERATOR: "<",
-                            Expression(
-                              Term(
-                                Power(
-                                  Factor(
-                                    TOKEN_ID: "i"
-                                  )
-                                )
-                              )
-                            )
+                    )
+                  ),
+                  TOKEN_RPAREN,
+                  TOKEN_SEMI
+                )
+              )
+            ),
+            TOKEN_RBRACE
+          )
+        )
+      )
+    ),
+    Statement(
+      Iterative Statement(
+        TOKEN_WHILE,
+        While Statement(
+          TOKEN_LPAREN,
+          Bool Expression(
+            Bool Term(
+              Bool Factor(
+                Relational Expression(
+                  Expression(
+                    Term(
+                      Power(
+                        Factor(
+                          TOKEN_ID: "x"
+                        )
+                      )
+                    )
+                  ),
+                  TOKEN_OPERATOR: ">",
+                  Expression(
+                    Term(
+                      Power(
+                        Factor(
+                          Constant(
+                            TOKEN_NUMBER: "0"
                           )
                         )
                       )
-                    ),
-                    TOKEN_SEMI,
-                    Increment(
-                      Expression(
-                        Term(
-                          Power(
-                            Factor(
-                              TOKEN_ID: "j"
-                            )
-                          )
-                        )
-                      ),
-                      TOKEN_OPERATOR: "++"
-                    ),
-                    TOKEN_RPAREN,
-                    Body(
-                      TOKEN_LBRACE,
-                      TOKEN_RBRACE
                     )
                   )
                 )
+              )
+            )
+          ),
+          TOKEN_RPAREN,
+          Body(
+            TOKEN_LBRACE,
+            Statements(
+              Statement(
+                Output(
+                  TOKEN_ID: "print",
+                  TOKEN_LPAREN,
+                  Print Expression(
+                    Expression(
+                      Term(
+                        Power(
+                          Factor(
+                            TOKEN_ID: "x"
+                          )
+                        )
+                      )
+                    )
+                  ),
+                  TOKEN_RPAREN,
+                  TOKEN_SEMI
+                )
+              ),
+              Statement(
+                Assignment(
+                  Identifier(
+                    TOKEN_ID: "x"
+                  ),
+                  TOKEN_OPERATOR: "-=",
+                  Expression(
+                    Term(
+                      Power(
+                        Factor(
+                          Constant(
+                            TOKEN_NUMBER: "1"
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+                TOKEN_SEMI
               )
             ),
             TOKEN_RBRACE
@@ -667,22 +737,196 @@ Program(
             TOKEN_LBRACE,
             Statements(
               Statement(
-                Output(
-                  TOKEN_ID: "print",
-                  TOKEN_LPAREN,
-                  Print Expression(
-                    Constant(
-                      TOKEN_STRING: hi
+                Assignment(
+                  Identifier(
+                    TOKEN_ID: "myNumber"
+                  ),
+                  TOKEN_OPERATOR: "/=",
+                  Expression(
+                    Term(
+                      Power(
+                        Factor(
+                          Constant(
+                            TOKEN_NUMBER: "2"
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+                TOKEN_SEMI
+              )
+            ),
+            TOKEN_RBRACE
+          ),
+          TOKEN_WHILE,
+          TOKEN_LPAREN,
+          Bool Expression(
+            Bool Term(
+              Bool Factor(
+                Relational Expression(
+                  Expression(
+                    Term(
+                      Power(
+                        Factor(
+                          TOKEN_ID: "myNumber"
+                        )
+                      )
                     )
                   ),
-                  TOKEN_RPAREN,
+                  TOKEN_OPERATOR: ">",
+                  Expression(
+                    Term(
+                      Power(
+                        Factor(
+                          Constant(
+                            TOKEN_NUMBER: "0"
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          ),
+          TOKEN_RPAREN,
+          TOKEN_SEMI
+        )
+      )
+    ),
+    Statement(
+      Declaration statement(
+        Declaration assignment statement(
+          Datatype(
+            TOKEN_DATATYPE: "int"
+          ),
+          Identifier List(
+            Identifier(
+              TOKEN_ID: "score"
+            )
+          ),
+          TOKEN_OPERATOR: "=",
+          Expression(
+            Term(
+              Power(
+                Factor(
+                  Constant(
+                    TOKEN_NUMBER: "10"
+                  )
+                )
+              )
+            )
+          ),
+          TOKEN_SEMI
+        )
+      )
+    ),
+    Statement(
+      Declaration statement(
+        Declaration assignment statement(
+          Datatype(
+            TOKEN_DATATYPE: "int"
+          ),
+          Identifier List(
+            Identifier(
+              TOKEN_ID: "result"
+            )
+          ),
+          TOKEN_OPERATOR: "=",
+          Expression(
+            Term(
+              Power(
+                Factor(
+                  Constant(
+                    TOKEN_NUMBER: "5"
+                  )
+                )
+              )
+            ),
+            TOKEN_OPERATOR: "+",
+            Term(
+              Power(
+                Factor(
+                  TOKEN_ID: "a"
+                )
+              )
+            )
+          ),
+          TOKEN_SEMI
+        )
+      )
+    ),
+    Statement(
+      Declaration statement(
+        Function(
+          TOKEN_DATATYPE: "int",
+          TOKEN_FUNCTION,
+          Identifier(
+            TOKEN_ID: "add"
+          ),
+          TOKEN_LPAREN,
+          Parameter list(
+            Datatype(
+              TOKEN_DATATYPE: "int"
+            ),
+            Identifier(
+              TOKEN_ID: "a"
+            ),
+            TOKEN_COMMA,
+            TOKEN_DATATYPE: "int",
+            Identifier(
+              TOKEN_ID: "b"
+            )
+          ),
+          TOKEN_RPAREN,
+          Body(
+            TOKEN_LBRACE,
+            Statements(
+              Statement(
+                Return(
+                  TOKEN_RETURN,
+                  Expression(
+                    Term(
+                      Power(
+                        Factor(
+                          TOKEN_ID: "a"
+                        )
+                      )
+                    ),
+                    TOKEN_OPERATOR: "+",
+                    Term(
+                      Power(
+                        Factor(
+                          TOKEN_ID: "b"
+                        )
+                      )
+                    )
+                  ),
                   TOKEN_SEMI
                 )
               )
             ),
             TOKEN_RBRACE
+          )
+        )
+      )
+    ),
+    Statement(
+      Declaration statement(
+        Array statement(
+          Datatype(
+            TOKEN_DATATYPE: "int"
           ),
-          TOKEN_WHILE
+          Identifier(
+            TOKEN_ID: "number"
+          ),
+          TOKEN_LBRACKET,
+          Constant(
+            TOKEN_NUMBER: "5"
+          ),
+          TOKEN_RBRACKET,
+          TOKEN_SEMI
         )
       )
     ),
@@ -690,11 +934,24 @@ Program(
       Input Statement(
         Identifier List(
           Identifier(
-            TOKEN_ID: "age"
-          ),
-          TOKEN_COMMA,
+            TOKEN_ID: "name"
+          )
+        ),
+        TOKEN_OPERATOR: "=",
+        TOKEN_ID: "input",
+        TOKEN_LPAREN,
+        Constant(
+          TOKEN_STRING: Enter your name:
+        ),
+        TOKEN_RPAREN,
+        TOKEN_SEMI
+      )
+    ),
+    Statement(
+      Input Statement(
+        Identifier List(
           Identifier(
-            TOKEN_ID: "hello"
+            TOKEN_ID: "age"
           )
         ),
         TOKEN_OPERATOR: "=",
@@ -708,105 +965,19 @@ Program(
       )
     ),
     Statement(
-      Declaration assignment statement(
-        Datatype(
-          TOKEN_DATATYPE: "int"
-        ),
+      Input Statement(
         Identifier List(
           Identifier(
-            TOKEN_ID: "age"
+            TOKEN_ID: "city"
           )
         ),
         TOKEN_OPERATOR: "=",
-        Expression(
-          Term(
-            Power(
-              Factor(
-                Constant(
-                  TOKEN_NUMBER: "5"
-                )
-              )
-            )
-          ),
-          TOKEN_OPERATOR: "+",
-          Term(
-            Power(
-              Factor(
-                Constant(
-                  TOKEN_NUMBER: "4"
-                )
-              )
-            )
-          )
-        ),
-        TOKEN_SEMI
-      )
-    ),
-    Statement(
-      Array statement(
-        Datatype(
-          TOKEN_DATATYPE: "int"
-        ),
-        Identifier(
-          TOKEN_ID: "students"
-        ),
-        TOKEN_LBRACKET,
+        TOKEN_ID: "input",
+        TOKEN_LPAREN,
         Constant(
-          TOKEN_NUMBER: "5"
+          TOKEN_STRING: Enter your city:
         ),
-        TOKEN_RBRACKET,
-        TOKEN_LBRACKET,
-        TOKEN_NUMBER: "2",
-        TOKEN_RBRACKET,
-        TOKEN_OPERATOR: "=",
-        TOKEN_LBRACE,
-        Expression(
-          Term(
-            Power(
-              Factor(
-                Constant(
-                  TOKEN_NUMBER: "4"
-                )
-              )
-            )
-          )
-        ),
-        TOKEN_COMMA,
-        Expression(
-          Term(
-            Power(
-              Factor(
-                Constant(
-                  TOKEN_NUMBER: "2"
-                )
-              )
-            )
-          )
-        ),
-        TOKEN_COMMA,
-        Expression(
-          Term(
-            Power(
-              Factor(
-                Constant(
-                  TOKEN_NUMBER: "1"
-                )
-              )
-            )
-          )
-        ),
-        TOKEN_RBRACE,
-        TOKEN_SEMI
-      )
-    ),
-    Statement(
-      Variable statement(
-        Datatype(
-          TOKEN_DATATYPE: "int"
-        ),
-        Identifier(
-          TOKEN_ID: "variabs"
-        ),
+        TOKEN_RPAREN,
         TOKEN_SEMI
       )
     )
