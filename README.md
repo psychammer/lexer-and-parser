@@ -11,7 +11,7 @@ added:
 
 ### parser.c
   added:  
-    <dec-assign-stmt> at line 172-205  
-    <it-assign-stmt> at line 208-235  
-    <array-stmt> draft at line 238-300  
+    dec-assign-stmt    at line 172-205  
+    it-assign-stmt     at line 208-235  
+    array-stmt draft   at line 238-300  
   
