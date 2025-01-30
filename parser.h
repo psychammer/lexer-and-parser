@@ -46,7 +46,9 @@ ParseTreeNode *parse_datatype();
 ParseTreeNode *parse_rel_expression();
 ParseTreeNode *parse_constant();
 ParseTreeNode *parse_function_call();
-
+ParseTreeNode *parse_dec_assign(); //updated
+ParseTreeNode *parse_it_assign(); //updated
+ParseTreeNode *parse_array(); //updated
 
 ParseTreeNode *parse_program();
 ParseTreeNode *parse_declaration();
@@ -109,6 +111,9 @@ ParseTreeNode *create_datatype_node();
 ParseTreeNode *create_rel_expression_node();
 ParseTreeNode *create_constant_node();
 ParseTreeNode *create_function_call_node();
+ParseTreeNode *create_dec_assign_node(); //updated
+ParseTreeNode *create_it_assign_node(); //updated
+ParseTreeNode *create_array_node(); //updated
 
 
 ParseTreeNode *create_program_node();
