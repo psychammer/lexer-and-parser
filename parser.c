@@ -176,7 +176,7 @@ ParseTreeNode *parse_statement() {
         return node;
     } 
 
-    // TOKEN FUNCTION
+    // <function-stmt>
     if (current_token < token_length && 
         ((myTokens[current_token+1].type == TOKEN_FUNCTION &&
         myTokens[current_token].type == TOKEN_DATATYPE)||
@@ -192,7 +192,19 @@ ParseTreeNode *parse_statement() {
 
         return node;
     }
-    // TOKEN DECLARATION ASSIGNMENT STATEMENT
+    // <variable-stmt>
+    else if(current_token < token_length && 
+        (myTokens[current_token].type == TOKEN_DATATYPE) && (myTokens[current_token+1].type == TOKEN_ID) && (myTokens[current_token+2].type == TOKEN_SEMI)){
+            ParseTreeNode *variable_stmt = parse_variable_stmt();
+            add_child(node, variable_stmt);
+            if(!variable_stmt){
+                fprintf(stderr, "Error: parsing output statement %d\n", 
+                    myTokens[current_token].line);
+                return NULL;
+            }
+            return node;
+    }
+    // <dec-assign-stmt>
     else if(current_token < token_length && 
         (myTokens[current_token].type == TOKEN_DATATYPE) && (myTokens[current_token+1].type == TOKEN_ID) && (myTokens[current_token+2].type == TOKEN_OPERATOR) &&(strcmp(myTokens[current_token+3].value, "input")!=0)){
         ParseTreeNode *dec_assign = parse_dec_assign();
@@ -204,7 +216,7 @@ ParseTreeNode *parse_statement() {
         }
         return node;
     }
-    // TOKEN ARRAY STATEMENT
+    // <array-stmt>
     else if(current_token < token_length && 
         (myTokens[current_token].type == TOKEN_DATATYPE) && (myTokens[current_token+2].type == TOKEN_LBRACKET)){
         ParseTreeNode *array = parse_array();
@@ -218,7 +230,8 @@ ParseTreeNode *parse_statement() {
     }
     // TOKEN INPUT (with datatype)
     else if(current_token < token_length && 
-        (myTokens[current_token].type == TOKEN_DATATYPE)){
+        (myTokens[current_token].type == TOKEN_DATATYPE) && (strcmp(myTokens[current_token+2].value, "input")==0 || myTokens[current_token+1].type == TOKEN_COMMA)
+        ){
 
         ParseTreeNode *input_statement = parse_input_statement();
         add_child(node, input_statement);
@@ -1153,6 +1166,48 @@ ParseTreeNode *parse_array(){
 
     return node;
 }
+
+
+ParseTreeNode *parse_variable_stmt(){
+    ParseTreeNode *node = create_node("Variable statement");
+
+    ParseTreeNode *datatype = parse_datatype();
+    add_child(node, datatype);
+
+    ParseTreeNode *identifier = parse_identifier();
+    add_child(node, identifier);
+
+
+    // Expect semicolon at end
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    } else {
+        fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }     
+
+    return node;
+}
+
+
+
+ParseTreeNode *parse_declaration_stmt(){
+    ParseTreeNode *node = create_node("Declaration statement");
+
+    // Expect semicolon at end
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    } else {
+        fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }     
+
+    return node;
+}
+
+
 
 
 

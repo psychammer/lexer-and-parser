@@ -205,3 +205,6 @@ TOKEN_COMMA          | 11              | ,                              | 42
 TOKEN_NUMBER         | 41              | 1                              | 42                  
 TOKEN_RBRACE         | 7               | }                              | 42                  
 TOKEN_SEMI           | 4               | ;                              | 42                  
+TOKEN_DATATYPE       | 32              | int                            | 44                  
+TOKEN_ID             | 0               | variabs                        | 44                  
+TOKEN_SEMI           | 4               | ;                              | 44                  

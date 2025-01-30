@@ -798,6 +798,17 @@ Program(
         TOKEN_RBRACE,
         TOKEN_SEMI
       )
+    ),
+    Statement(
+      Variable statement(
+        Datatype(
+          TOKEN_DATATYPE: "int"
+        ),
+        Identifier(
+          TOKEN_ID: "variabs"
+        ),
+        TOKEN_SEMI
+      )
     )
   )
 )
