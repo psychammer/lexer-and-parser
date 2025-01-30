@@ -865,6 +865,65 @@ ParseTreeNode *parse_constant(){
     return node;
 }
 
+ParseTreeNode *parse_iterative_statement() {
+    ParseTreeNode *node = create_node("Iterative Statement");
+
+    if (current_token >= token_length) {
+        fprintf(stderr, "Error: Unexpected end of input\n");
+        return node;
+    }
+
+    switch (myTokens[current_token].type) {
+        case TOKEN_FOR:
+            add_child(node, check_create_advance(TOKEN_FOR, "For"));
+            parse_for_body(node);
+            break;
+
+        case TOKEN_WHILE:
+            add_child(node, check_create_advance(TOKEN_WHILE, "While"));
+            parse_while_body(node);
+            break;
+
+        case TOKEN_DO:
+            add_child(node, check_create_advance(TOKEN_DO, "Do"));
+            parse_do_while_body(node);
+            break;
+
+        default:
+            fprintf(stderr, "Error: Expected 'for', 'while' or 'do' at line %d\n", 
+                    myTokens[current_token].line);
+            recover();
+    }
+
+    return node;
+}
+
+static void parse_for_body(ParseTreeNode *node) {
+    expect_token(TOKEN_LPAREN, "(");
+    add_child(node, parse_assignment_statement());
+    expect_token(TOKEN_SEMI, ";");
+    add_child(node, parse_bool_expression());
+    expect_token(TOKEN_SEMI, ";");
+    add_child(node, parse_assignment_statement());
+    expect_token(TOKEN_RPAREN, ")");
+    add_child(node, parse_body());
+}
+
+static void parse_while_body(ParseTreeNode *node) {
+    expect_token(TOKEN_LPAREN, "(");
+    add_child(node, parse_bool_expression());
+    expect_token(TOKEN_RPAREN, ")");
+    add_child(node, parse_body());
+}
+
+static void parse_do_while_body(ParseTreeNode *node) {
+    add_child(node, parse_body());
+    expect_token(TOKEN_WHILE, "while");
+    expect_token(TOKEN_LPAREN, "(");
+    add_child(node, parse_bool_expression());
+    expect_token(TOKEN_RPAREN, ")");
+    expect_token(TOKEN_SEMI, ";");
+}
 
 
 // Implement create functions for each non-terminal

@@ -21,3 +21,8 @@ fun sum(float a, char abby){
     return (5 + 5)**2;
 
 }
+
+do { myNumber /= 2};
+    while (myNumber > 0);
+
+for (int i = 0; i < 5; i++) {print(now)}
