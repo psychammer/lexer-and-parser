@@ -14,4 +14,7 @@ added:
     dec-assign-stmt    at line 172-205  
     it-assign-stmt     at line 208-235  
     array-stmt draft   at line 238-300  
+    create_dec_assign_node(),
+    create_it_assign_node(),
+    create_array_node()       at line 1011-1024
   
