@@ -34,3 +34,9 @@ do{
 while(i < 4){
     return 5;
 }
+
+age, hello = input("Enter your age: ");
+
+int age = 5+4;
+
+int students[5][2] = {4, 2, 1};

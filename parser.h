@@ -52,6 +52,11 @@ ParseTreeNode *parse_it_assign_stmt();
 ParseTreeNode *parse_while_body();
 ParseTreeNode *parse_do_while_body();
 ParseTreeNode *parse_increment();
+ParseTreeNode *parse_input_statement();
+ParseTreeNode *parse_type_cast();
+ParseTreeNode *parse_ident_list();
+ParseTreeNode *parse_dec_assign();
+ParseTreeNode *parse_array();
 
 ParseTreeNode *parse_program();
 ParseTreeNode *parse_declaration();

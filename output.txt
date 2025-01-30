@@ -172,4 +172,36 @@ TOKEN_RETURN         | 25              | return                         | 35
 TOKEN_NUMBER         | 41              | 5                              | 35                  
 TOKEN_SEMI           | 4               | ;                              | 35                  
 TOKEN_RBRACE         | 7               | }                              | 36                  
-TOKEN_EOF            | 18              |                                | 37                  
+TOKEN_ID             | 0               | age                            | 38                  
+TOKEN_COMMA          | 11              | ,                              | 38                  
+TOKEN_ID             | 0               | hello                          | 38                  
+TOKEN_OPERATOR       | 19              | =                              | 38                  
+TOKEN_ID             | 0               | input                          | 38                  
+TOKEN_LPAREN         | 5               | (                              | 38                  
+TOKEN_STRING         | 2               | Enter your age:                | 38                  
+TOKEN_RPAREN         | 6               | )                              | 38                  
+TOKEN_SEMI           | 4               | ;                              | 38                  
+TOKEN_DATATYPE       | 32              | int                            | 40                  
+TOKEN_ID             | 0               | age                            | 40                  
+TOKEN_OPERATOR       | 19              | =                              | 40                  
+TOKEN_NUMBER         | 41              | 5                              | 40                  
+TOKEN_OPERATOR       | 19              | +                              | 40                  
+TOKEN_NUMBER         | 41              | 4                              | 40                  
+TOKEN_SEMI           | 4               | ;                              | 40                  
+TOKEN_DATATYPE       | 32              | int                            | 42                  
+TOKEN_ID             | 0               | students                       | 42                  
+TOKEN_LBRACKET       | 9               | [                              | 42                  
+TOKEN_NUMBER         | 41              | 5                              | 42                  
+TOKEN_RBRACKET       | 10              | ]                              | 42                  
+TOKEN_LBRACKET       | 9               | [                              | 42                  
+TOKEN_NUMBER         | 41              | 2                              | 42                  
+TOKEN_RBRACKET       | 10              | ]                              | 42                  
+TOKEN_OPERATOR       | 19              | =                              | 42                  
+TOKEN_LBRACE         | 8               | {                              | 42                  
+TOKEN_NUMBER         | 41              | 4                              | 42                  
+TOKEN_COMMA          | 11              | ,                              | 42                  
+TOKEN_NUMBER         | 41              | 2                              | 42                  
+TOKEN_COMMA          | 11              | ,                              | 42                  
+TOKEN_NUMBER         | 41              | 1                              | 42                  
+TOKEN_RBRACE         | 7               | }                              | 42                  
+TOKEN_SEMI           | 4               | ;                              | 42                  

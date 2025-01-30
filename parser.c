@@ -108,6 +108,36 @@ ParseTreeNode *parse_statement() {
         return node;
     }
 
+    // TOKEN PRINT
+    if (current_token < token_length && 
+        myTokens[current_token].type == TOKEN_ID &&
+        strcmp(myTokens[current_token].value, "print")==0){
+        ParseTreeNode *output = parse_output_statement();
+        add_child(node, output);
+        if(!output){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+
+        return node;
+    }
+    // TOKEN INPUT (without datatype)
+    else if(current_token < token_length && 
+        myTokens[current_token].type == TOKEN_ID &&
+        // check if the next two token is an input type, or if the nex token is a comma (indicating it's a ident list)
+        strcmp(myTokens[current_token+2].value, "input")==0 || myTokens[current_token+1].type == TOKEN_COMMA){
+        ParseTreeNode *input_statement = parse_input_statement();
+        add_child(node, input_statement);
+        if(!input_statement){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+        return node;
+
+    } 
+
     // TOKEN ASSIGNMENT_STATEMENT
     if (current_token + 1 < token_length && 
         myTokens[current_token].type == TOKEN_ID &&
@@ -128,21 +158,6 @@ ParseTreeNode *parse_statement() {
                     myTokens[current_token].line);
             return NULL;
         }    
-
-        return node;
-    } 
-
-    // TOKEN PRINT
-    if (current_token < token_length && 
-        myTokens[current_token].type == TOKEN_ID &&
-        strcmp(myTokens[current_token].value, "print")==0){
-        ParseTreeNode *output = parse_output_statement();
-        add_child(node, output);
-        if(!output){
-            fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
-            return NULL;
-        }
 
         return node;
     } 
@@ -176,7 +191,44 @@ ParseTreeNode *parse_statement() {
         }
 
         return node;
-    } 
+    }
+    // TOKEN DECLARATION ASSIGNMENT STATEMENT
+    else if(current_token < token_length && 
+        (myTokens[current_token].type == TOKEN_DATATYPE) && (myTokens[current_token+1].type == TOKEN_ID) && (myTokens[current_token+2].type == TOKEN_OPERATOR) &&(strcmp(myTokens[current_token+3].value, "input")!=0)){
+        ParseTreeNode *dec_assign = parse_dec_assign();
+        add_child(node, dec_assign);
+        if(!dec_assign){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+        return node;
+    }
+    // TOKEN ARRAY STATEMENT
+    else if(current_token < token_length && 
+        (myTokens[current_token].type == TOKEN_DATATYPE) && (myTokens[current_token+2].type == TOKEN_LBRACKET)){
+        ParseTreeNode *array = parse_array();
+        add_child(node, array);
+        if(!array){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+        return node;
+    }
+    // TOKEN INPUT (with datatype)
+    else if(current_token < token_length && 
+        (myTokens[current_token].type == TOKEN_DATATYPE)){
+
+        ParseTreeNode *input_statement = parse_input_statement();
+        add_child(node, input_statement);
+        if(!input_statement){
+            fprintf(stderr, "Error: parsing output statement %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+        return node;
+    }
 
     // TOKEN FOR, WHILE
     if (current_token < token_length && 
@@ -866,20 +918,243 @@ ParseTreeNode *parse_do_while_body() {
 }
 
 
-ParseTreeNode *input_statement() {
+ParseTreeNode *parse_input_statement() {
     ParseTreeNode *node = create_node("Input Statement");
 
-
-
-    if (current_token >= token_length) {
-        fprintf(stderr, "Error: Unexpected end of input\n");
-        return node;
+    // opt datatype
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_DATATYPE) {
+        add_child(node, parse_datatype());
     }
 
+    // identifier
+    ParseTreeNode *identifier_node = parse_ident_list();
+    add_child(node, identifier_node);
+    if (!identifier_node) {
+        fprintf(stderr, "Error: Expected identifier in input statement at line %d\n", myTokens[current_token].line);
+        return NULL;
+    }
 
+    // '='
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_OPERATOR &&
+        strcmp(myTokens[current_token].value, "=") == 0) {
+        add_child(node, check_create_advance(TOKEN_OPERATOR, "Equals"));
+    } else {
+        fprintf(stderr, "Error: Expected '=' in input statement at line %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+
+    ParseTreeNode *type_cast = parse_type_cast();
+    if (type_cast) {
+        add_child(node, type_cast);
+    }
+
+    // opt '('
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_LPAREN) {
+        add_child(node, check_create_advance(TOKEN_LPAREN, "Left Parenthesis"));
+    }
+
+    // "input"
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_ID &&
+        strcmp(myTokens[current_token].value, "input") == 0) {
+        add_child(node, check_create_advance(TOKEN_ID, "Input"));
+    } else {
+        fprintf(stderr, "Error: Expected 'input' function call in input statement at line %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+
+    // (
+    add_child(node, check_create_advance(TOKEN_LPAREN, "Left Parenthesis"));
+
+    // string constant
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_STRING) {
+        add_child(node, parse_constant());
+    } else {
+        fprintf(stderr, "Error: Expected string constant inside input function at line %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+
+    // )
+    add_child(node, check_create_advance(TOKEN_RPAREN, "Right Parenthesis"));
+
+    // Opt )
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_RPAREN) {
+        add_child(node, check_create_advance(TOKEN_RPAREN, "Right Parenthesis"));
+    }
+
+    // ;
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    } else {
+        fprintf(stderr, "Error: Missing semicolon at end of input statement at line %d\n", myTokens[current_token].line);
+        return NULL;
+    }
 
     return node;
 }
+
+
+ParseTreeNode *parse_type_cast() {
+        ParseTreeNode *node = create_node("Type Cast");
+
+        // int,float,bool
+        if (current_token < token_length && myTokens[current_token].type == TOKEN_DATATYPE &&
+            (strcmp(myTokens[current_token].value, "int") == 0 ||
+            strcmp(myTokens[current_token].value, "float") == 0 ||
+            strcmp(myTokens[current_token].value, "bool") == 0)) {
+            add_child(node, check_create_advance(TOKEN_DATATYPE, "Type Cast"));
+        } else {
+            return NULL;
+        }
+
+        return node;
+}
+
+// <ident-list>
+ParseTreeNode *parse_ident_list() {
+    ParseTreeNode *node = create_node("Identifier List");
+
+    // first ident
+    ParseTreeNode *identifier = parse_identifier();
+    add_child(node, identifier);
+    if (!identifier) {
+        fprintf(stderr, "Error: Expected identifier in identifier list at line %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+
+    // handles multiple idents
+    while (current_token < token_length && myTokens[current_token].type == TOKEN_COMMA) {
+        add_child(node, check_create_advance(TOKEN_COMMA, "Comma"));
+
+        ParseTreeNode *next_identifier = parse_identifier();
+        add_child(node, next_identifier);
+        if (!next_identifier) {
+            fprintf(stderr, "Error: Expected identifier after comma in identifier list at line %d\n", myTokens[current_token].line);
+            return NULL;
+        }
+    }
+
+    return node;
+}
+
+// <dec-assign-stmt> 
+ParseTreeNode *parse_dec_assign(){
+    ParseTreeNode *node = create_node("Declaration assignment statement");
+    // expect data type
+    add_child(node, parse_datatype());
+
+    /* expect identifier --------------------------------------------connect to <ident-list> parsing
+    ParseTreeNode *identifier_list_node = parse_identifier_list();
+    add_child(node, identifier_list_node);
+    */ 
+
+    ParseTreeNode *identifier_list_node = parse_ident_list();
+    add_child(node, identifier_list_node);
+    
+    if(current_token < token_length && myTokens[current_token].type==TOKEN_OPERATOR && (myTokens[current_token].value[0] == '=' && myTokens[current_token].value[1] != '=' || (myTokens[current_token].value[0] != '=' && myTokens[current_token].value[1] == '=')) )
+        add_child(node, (check_create_advance(TOKEN_OPERATOR, "Equals")));
+
+    // Parse expression
+    ParseTreeNode *expression = parse_exp();
+    add_child(node, expression);
+    if(!expression){
+        fprintf(stderr, "Error: parsing expression %d\n", 
+            myTokens[current_token].line);
+        return NULL;
+    }
+
+    // semicolon
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    } else {
+        fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d current value is %s\n", 
+                myTokens[current_token].line, myTokens[current_token].value);
+        return NULL;
+    }       
+
+    return node; 
+}
+
+// <array-stmt> ::= [data-type] identifier (“[“ (int-const | identifier)* “]”)+ [“=” “{“ <expression> “}”] “;”
+ParseTreeNode *parse_array(){
+    ParseTreeNode *node = create_node("Array statement");
+
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_DATATYPE) 
+        add_child(node, parse_datatype());
+
+    // expected identifier
+    ParseTreeNode *identifier_node = parse_identifier();
+    add_child(node, identifier_node);
+
+    //expected left bracket
+    add_child(node, check_create_advance(TOKEN_LBRACKET, "Left bracket"));
+    if(current_token < token_length && myTokens[current_token].type==TOKEN_ID){
+        ParseTreeNode *identifier_node = parse_identifier(); // array identifier dimension
+        add_child(node, identifier_node);
+    } else if (current_token < token_length && myTokens[current_token].type==TOKEN_NUMBER){
+        add_child(node, parse_constant());
+    }
+    //expected right bracket
+    add_child(node, check_create_advance(TOKEN_RBRACKET, "Right bracket"));
+
+    //kleene star for array dimension (kleene star cause we already expect the array identifier to have 1 dimension)
+    while(current_token < token_length && myTokens[current_token].type==TOKEN_LBRACKET){
+        add_child(node, check_create_advance(TOKEN_LBRACKET, "Left bracket"));
+        if(current_token < token_length && myTokens[current_token].type==TOKEN_ID){
+            ParseTreeNode *identifier_node = parse_identifier(); // array identifier dimension
+            add_child(node, identifier_node);
+        } else if (current_token < token_length && myTokens[current_token].type==TOKEN_NUMBER){
+            add_child(node, check_create_advance(TOKEN_NUMBER, "Number"));
+        }
+        //expected right bracket
+        add_child(node, check_create_advance(TOKEN_RBRACKET, "Right bracket"));
+    }
+
+    //if array has assigned values
+    if(current_token < token_length && myTokens[current_token].type==TOKEN_OPERATOR && (myTokens[current_token].value[0] == '=' && myTokens[current_token].value[1] != '=' || (myTokens[current_token].value[0] != '=' && myTokens[current_token].value[1] == '=')) ){
+        add_child(node, (check_create_advance(TOKEN_OPERATOR, "Equals")));
+
+        //expected left brace
+        add_child(node, check_create_advance(TOKEN_LBRACE, "Left_Brace"));
+
+        //expected expression
+        ParseTreeNode *expression = parse_exp();
+        add_child(node, expression);
+        if(!expression){
+            fprintf(stderr, "Error: parsing expression %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+
+        while(myTokens[current_token].type == TOKEN_COMMA){
+            add_child(node, check_create_advance(TOKEN_COMMA, "Comma"));
+
+            //expected multiple expression
+            ParseTreeNode *expression = parse_exp();
+            add_child(node, expression);
+            if(!expression){
+                fprintf(stderr, "Error: parsing expression %d\n", 
+                    myTokens[current_token].line);
+                return NULL;
+            }
+        }
+
+        //expected right brace
+        add_child(node, check_create_advance(TOKEN_RBRACE, "Right_Brace"));
+    }
+
+    // Expect semicolon at end
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    } else {
+        fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }        
+
+    return node;
+}
+
+
 
 // <increment> 
 ParseTreeNode *parse_increment() {
@@ -1442,3 +1717,4 @@ char *trim_whitespace(char *str) {
     *(end + 1) = '\0';
     return str;
 }
+

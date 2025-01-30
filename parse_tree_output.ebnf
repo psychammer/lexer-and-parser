@@ -685,6 +685,119 @@ Program(
           TOKEN_WHILE
         )
       )
+    ),
+    Statement(
+      Input Statement(
+        Identifier List(
+          Identifier(
+            TOKEN_ID: "age"
+          ),
+          TOKEN_COMMA,
+          Identifier(
+            TOKEN_ID: "hello"
+          )
+        ),
+        TOKEN_OPERATOR: "=",
+        TOKEN_ID: "input",
+        TOKEN_LPAREN,
+        Constant(
+          TOKEN_STRING: Enter your age:
+        ),
+        TOKEN_RPAREN,
+        TOKEN_SEMI
+      )
+    ),
+    Statement(
+      Declaration assignment statement(
+        Datatype(
+          TOKEN_DATATYPE: "int"
+        ),
+        Identifier List(
+          Identifier(
+            TOKEN_ID: "age"
+          )
+        ),
+        TOKEN_OPERATOR: "=",
+        Expression(
+          Term(
+            Power(
+              Factor(
+                Constant(
+                  TOKEN_NUMBER: "5"
+                )
+              )
+            )
+          ),
+          TOKEN_OPERATOR: "+",
+          Term(
+            Power(
+              Factor(
+                Constant(
+                  TOKEN_NUMBER: "4"
+                )
+              )
+            )
+          )
+        ),
+        TOKEN_SEMI
+      )
+    ),
+    Statement(
+      Array statement(
+        Datatype(
+          TOKEN_DATATYPE: "int"
+        ),
+        Identifier(
+          TOKEN_ID: "students"
+        ),
+        TOKEN_LBRACKET,
+        Constant(
+          TOKEN_NUMBER: "5"
+        ),
+        TOKEN_RBRACKET,
+        TOKEN_LBRACKET,
+        TOKEN_NUMBER: "2",
+        TOKEN_RBRACKET,
+        TOKEN_OPERATOR: "=",
+        TOKEN_LBRACE,
+        Expression(
+          Term(
+            Power(
+              Factor(
+                Constant(
+                  TOKEN_NUMBER: "4"
+                )
+              )
+            )
+          )
+        ),
+        TOKEN_COMMA,
+        Expression(
+          Term(
+            Power(
+              Factor(
+                Constant(
+                  TOKEN_NUMBER: "2"
+                )
+              )
+            )
+          )
+        ),
+        TOKEN_COMMA,
+        Expression(
+          Term(
+            Power(
+              Factor(
+                Constant(
+                  TOKEN_NUMBER: "1"
+                )
+              )
+            )
+          )
+        ),
+        TOKEN_RBRACE,
+        TOKEN_SEMI
+      )
     )
   )
 )
