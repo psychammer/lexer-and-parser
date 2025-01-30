@@ -46,7 +46,8 @@ ParseTreeNode *parse_datatype();
 ParseTreeNode *parse_rel_expression();
 ParseTreeNode *parse_constant();
 ParseTreeNode *parse_function_call();
-
+ParseTreeNode *parse_type_cast();
+ParseTreeNode *parse_ident_list();
 
 ParseTreeNode *parse_program();
 ParseTreeNode *parse_declaration();
@@ -109,7 +110,8 @@ ParseTreeNode *create_datatype_node();
 ParseTreeNode *create_rel_expression_node();
 ParseTreeNode *create_constant_node();
 ParseTreeNode *create_function_call_node();
-
+ParseTreeNode *create_type_cast_node();
+ParseTreeNode *create_ident_list_node();
 
 ParseTreeNode *create_program_node();
 ParseTreeNode *create_declaration_node();

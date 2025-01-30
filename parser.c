@@ -167,7 +167,31 @@ ParseTreeNode *parse_statement() {
         return node;
     } 
 
-    return NULL;
+    //TOKEN DECLARATION
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_DATATYPE) {
+        ParseTreeNode *declaration = parse_declaration();
+        add_child(node, declaration);
+        if (!declaration) {
+            fprintf(stderr, "Error: parsing declaration statement at line %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+        return node;
+    }
+
+    // TOKEN INPUT
+    if (current_token < token_length && 
+        (myTokens[current_token].type == TOKEN_DATATYPE || 
+        (myTokens[current_token].type == TOKEN_ID && strcmp(myTokens[current_token].value, "input") == 0))) {
+        ParseTreeNode *input_stmt = parse_input_statement();
+        add_child(node, input_stmt);
+        if (!input_stmt) {
+            fprintf(stderr, "Error: Parsing input statement at line %d\n", myTokens[current_token].line);
+            return NULL;
+        }
+        return node;
+    }
+
 }
 
 
@@ -1008,6 +1032,54 @@ ParseTreeNode *check_create_advance(TokenType type, const char* node_name) {
         printf("Unexpected token %s\n", getTokenType(type));
         recover();
     }
+    return node;
+}
+
+//added
+ParseTreeNode *create_declaration_node() {
+    return create_node("Declaration Statement");
+}
+
+ParseTreeNode *parse_declaration() {
+    ParseTreeNode *node = create_declaration_node();
+
+    // Expect datatype
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_DATATYPE) {
+        add_child(node, check_create_advance(TOKEN_DATATYPE, "Datatype"));
+    } else {
+        fprintf(stderr, "Error: Expected datatype at line %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+
+    // 🔹 Replace single identifier parsing with `parse_ident_list()`
+    ParseTreeNode *ident_list = parse_ident_list();
+    add_child(node, ident_list);
+    if (!ident_list) {
+        fprintf(stderr, "Error: Expected identifier list at line %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+
+    // Check for assignment (`=`) in `dec-assign-stmt`
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_OPERATOR &&
+        strcmp(myTokens[current_token].value, "=") == 0) {
+        add_child(node, check_create_advance(TOKEN_OPERATOR, "Equals"));
+
+        ParseTreeNode *expression = parse_exp();
+        add_child(node, expression);
+        if (!expression) {
+            fprintf(stderr, "Error: Invalid expression in declaration at line %d\n", myTokens[current_token].line);
+            return NULL;
+        }
+    }
+
+    // Expect semicolon (`;`)
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    } else {
+        fprintf(stderr, "Error: Missing semicolon at end of declaration at line %d\n", myTokens[current_token].line);
+        return NULL;
+    }
+
     return node;
 }
 

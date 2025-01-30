@@ -1,3 +1,5 @@
+int x;
+int y,z;
 Grade = 1.0;
 score += 1;
 result = (x + 2) * z / (y ** 2 ) - 5;
@@ -19,5 +21,8 @@ else{
 fun sum(float a, char abby){
 
     return (5 + 5)**2;
-
 }
+
+name = input("Enter your name: "); 
+age = input("Enter your age: "); 
+city = input("Enter your city: "); 
