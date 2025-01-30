@@ -1032,6 +1032,21 @@ ParseTreeNode * create_function_call_node()
     return create_node("Function Call");
 }
 
+ParseTreeNode *create_while_node()
+{
+    return create_node("While");
+}
+
+ParseTreeNode *create_for_node()
+{
+    return create_node("For");
+}
+
+ParseTreeNode *create_do_while_node()
+{
+    return create_node("Do While");
+}
+
 // Function to allocate and initialize a new ParseTreeNode
 ParseTreeNode *create_node(const char *name) {
     ParseTreeNode *node = malloc(sizeof(ParseTreeNode));
