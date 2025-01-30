@@ -1043,7 +1043,7 @@ ParseTreeNode *create_declaration_node() {
 ParseTreeNode *parse_declaration() {
     ParseTreeNode *node = create_declaration_node();
 
-    // Expect datatype
+    // datatype
     if (current_token < token_length && myTokens[current_token].type == TOKEN_DATATYPE) {
         add_child(node, check_create_advance(TOKEN_DATATYPE, "Datatype"));
     } else {
@@ -1051,7 +1051,7 @@ ParseTreeNode *parse_declaration() {
         return NULL;
     }
 
-    // 🔹 Replace single identifier parsing with `parse_ident_list()`
+    // ident list
     ParseTreeNode *ident_list = parse_ident_list();
     add_child(node, ident_list);
     if (!ident_list) {
@@ -1059,7 +1059,7 @@ ParseTreeNode *parse_declaration() {
         return NULL;
     }
 
-    // Check for assignment (`=`) in `dec-assign-stmt`
+    // Check for '='
     if (current_token < token_length && myTokens[current_token].type == TOKEN_OPERATOR &&
         strcmp(myTokens[current_token].value, "=") == 0) {
         add_child(node, check_create_advance(TOKEN_OPERATOR, "Equals"));
@@ -1072,7 +1072,7 @@ ParseTreeNode *parse_declaration() {
         }
     }
 
-    // Expect semicolon (`;`)
+    // semicolon
     if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
         add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
     } else {
