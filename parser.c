@@ -1008,6 +1008,21 @@ ParseTreeNode *create_statement_node() {
     return create_node("Statement");
 }
 
+// dec-assign-stmt ------------------------------------------
+ParseTreeNode *create_dec_assign_node() {
+    return create_node("Declaration-assignment");
+}
+
+// it-assign-stmt ------------------------------------------
+ParseTreeNode *create_dit_assign_node() {
+    return create_node("Iterative-assignment");
+}
+
+// array-stmt ------------------------------------------
+ParseTreeNode *create_array_node() {
+    return create_node("Array");
+}
+
 ParseTreeNode *create_assignment_node() {
     return create_node("Assignment");
 }
