@@ -169,7 +169,135 @@ ParseTreeNode *parse_statement() {
 
     return NULL;
 }
+// <dec-assign-stmt>-------------------------------------------------------------------------------------------------------
+ParseTreeNode *parse_dec_assign(){
+    ParseTreeNode *node = create_dec_assign_node();
+    // expect data type
+    add_child(node, check_create_advance(TOKEN_DATATYPE, "Datatype"));
 
+    /* expect identifier --------------------------------------------connect to <ident-list> parsing
+    ParseTreeNode *identifier_list_node = parse_identifier_list();
+    add_child(node, identifier_list_node);
+    */ 
+    
+    if(current_token < token_length && myTokens[current_token].type==TOKEN_OPERATOR && (myTokens[current_token].value[0] == '=' && myTokens[current_token].value[1] != '=' || (myTokens[current_token].value[0] != '=' && myTokens[current_token].value[1] == '=')) )
+        add_child(node, (check_create_advance(TOKEN_OPERATOR, "Equals")));
+
+    // Parse expression
+    ParseTreeNode *expression = parse_exp();
+    add_child(node, expression);
+    if(!expression){
+        fprintf(stderr, "Error: parsing expression %d\n", 
+            myTokens[current_token].line);
+        return NULL;
+    }
+
+    // semicolon
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    } else {
+        fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }       
+
+    return node; 
+}
+// -------------------------------------------------------------------------------------------------------------------------
+
+// <it-assign-stmt> --------------------------------------------------------------------------------------------------------
+ParseTreeNode *parse_it_assign(){
+    ParseTreeNode *node = create_it_assign_node();
+
+    // optional datatype
+    if(myTokens[current_token].type == TOKEN_DATATYPE){
+        add_child(node, check_create_advance(TOKEN_DATATYPE, "Datatype"));
+    }
+
+    // expected identifier
+    ParseTreeNode *identifier_node = parse_identifier();
+    add_child(node, identifier_node);
+
+    if(current_token < token_length && myTokens[current_token].type==TOKEN_OPERATOR && (myTokens[current_token].value[0] == '=' && myTokens[current_token].value[1] != '=' || (myTokens[current_token].value[0] != '=' && myTokens[current_token].value[1] == '=')) )
+        add_child(node, (check_create_advance(TOKEN_OPERATOR, "Equals")));
+
+    //expected expression
+    ParseTreeNode *expression = parse_exp();
+    add_child(node, expression);
+    if(!expression){
+        fprintf(stderr, "Error: parsing expression %d\n", 
+            myTokens[current_token].line);
+        return NULL;
+    }
+
+    return node;
+}
+// -------------------------------------------------------------------------------------------------------------------------
+
+// <array-stmt> ------------------------------------------------------------------------------------------------------------
+ParseTreeNode *parse_array(){
+    ParseTreeNode *node = create_array_node();
+
+    // expected identifier
+    ParseTreeNode *identifier_node = parse_identifier();
+    add_child(node, identifier_node);
+
+    //expected left bracket
+    add_child(node, check_create_advance(TOKEN_LBRACKET, "Left bracket"));
+    if(current_token < token_length && myTokens[current_token].type==TOKEN_ID){
+        ParseTreeNode *identifier_node = parse_identifier(); // array identifier dimension
+        add_child(node, identifier_node);
+    } else if (current_token < token_length && myTokens[current_token].type==TOKEN_NUMBER){
+        add_child(node, check_create_advance(TOKEN_NUMBER, "Number"));
+    }
+    //expected right bracket
+    add_child(node, check_create_advance(TOKEN_RBRACKET, "Right bracket"));
+
+    //kleene star for array dimension (kleene star cause we already expect the array identifier to have 1 dimension)
+    while(current_token < token_length && myTokens[current_token].type==TOKEN_LBRACKET){
+        add_child(node, check_create_advance(TOKEN_LBRACKET, "Left bracket"));
+        if(current_token < token_length && myTokens[current_token].type==TOKEN_ID){
+            ParseTreeNode *identifier_node = parse_identifier(); // array identifier dimension
+            add_child(node, identifier_node);
+        } else if (current_token < token_length && myTokens[current_token].type==TOKEN_NUMBER){
+            add_child(node, check_create_advance(TOKEN_NUMBER, "Number"));
+        }
+        //expected right bracket
+        add_child(node, check_create_advance(TOKEN_RBRACKET, "Right bracket"));
+    }
+
+    //if array has assigned values
+    if(current_token < token_length && myTokens[current_token].type==TOKEN_OPERATOR && (myTokens[current_token].value[0] == '=' && myTokens[current_token].value[1] != '=' || (myTokens[current_token].value[0] != '=' && myTokens[current_token].value[1] == '=')) ){
+        add_child(node, (check_create_advance(TOKEN_OPERATOR, "Equals")));
+
+        //expected left brace
+        add_child(node, check_create_advance(TOKEN_LBRACE, "Left_Brace"));
+
+        //expected expression
+        ParseTreeNode *expression = parse_exp();
+        add_child(node, expression);
+        if(!expression){
+            fprintf(stderr, "Error: parsing expression %d\n", 
+                myTokens[current_token].line);
+            return NULL;
+        }
+
+        //expected right brace
+        add_child(node, check_create_advance(TOKEN_RBRACE, "Right_Brace"));
+    }
+
+    // Expect semicolon at end
+    if (current_token < token_length && myTokens[current_token].type == TOKEN_SEMI) {
+        add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
+    } else {
+        fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
+                myTokens[current_token].line);
+        return NULL;
+    }        
+
+    return node;
+}
+// -------------------------------------------------------------------------------------------------------------------------
 
 ParseTreeNode *parse_assignment() {
     ParseTreeNode *node = create_assignment_node();
