@@ -67,6 +67,7 @@ ParseTreeNode *parse_factor_statement();
 ParseTreeNode *parse_const_statement();
 ParseTreeNode *parse_while_statement();
 ParseTreeNode *parse_for_statement();
+ParseTreeNode *parse_do_while_statement();
 ParseTreeNode *parse_input_statement();
 ParseTreeNode *parse_output_statement();
 ParseTreeNode *parse_if_statement();
