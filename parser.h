@@ -46,7 +46,12 @@ ParseTreeNode *parse_datatype();
 ParseTreeNode *parse_rel_expression();
 ParseTreeNode *parse_constant();
 ParseTreeNode *parse_function_call();
-
+ParseTreeNode *parse_iterative_statement();
+ParseTreeNode *parse_for_body();
+ParseTreeNode *parse_it_assign_stmt();
+ParseTreeNode *parse_while_body();
+ParseTreeNode *parse_do_while_body();
+ParseTreeNode *parse_increment();
 
 ParseTreeNode *parse_program();
 ParseTreeNode *parse_declaration();

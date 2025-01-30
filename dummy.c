@@ -258,8 +258,9 @@ ParseTreeNode *parse_exp() {
 
     // Parse additional terms connected by "+" or "-"
     while (current_token < token_length && 
-            (strlen(myTokens[current_token].value)<=1) &&
            (myTokens[current_token].type == TOKEN_OPERATOR) && 
+           // Avoid increments (++ and --)
+        //    (strlen(myTokens[current_token].value)<=1) &&
            (myTokens[current_token].value[0] == '+' || myTokens[current_token].value[0] == '-')) {
         // Match the operator
         ParseTreeNode *operator_node = check_create_advance(TOKEN_OPERATOR, "Operator");
@@ -289,12 +290,10 @@ ParseTreeNode *parse_term() {
     }
     add_child(node, power_node);
 
-    // Parse additional factors connected by "*" or "/"
+    // Parse additional factors connected by "*" and "/"
     while (current_token < token_length && 
-            (strlen(myTokens[current_token].value)<=1) && 
-           (myTokens[current_token].type == TOKEN_OPERATOR) &&
-
-           (myTokens[current_token].value[0] == '*' || myTokens[current_token].value[0] == '/')) {
+           (myTokens[current_token].type == TOKEN_OPERATOR) && 
+           (myTokens[current_token].value[0] == '*' || myTokens[current_token].value[1] == '/')) {
         // Match the operator
         ParseTreeNode *operator_node = check_create_advance(TOKEN_OPERATOR, "Operator");
         add_child(node, operator_node);
@@ -325,7 +324,7 @@ ParseTreeNode *parse_power() {
     // Parse additional factors connected by "**"
     while (current_token < token_length && 
            (myTokens[current_token].type == TOKEN_OPERATOR) && 
-           (myTokens[current_token].value[0] == '*' && myTokens[current_token].value[1] == '*')) {
+           (myTokens[current_token].value[0] == '*' && myTokens[current_token].value[1] == '/')) {
         // Match the operator
         ParseTreeNode *operator_node = check_create_advance(TOKEN_OPERATOR, "Operator");
         add_child(node, operator_node);
@@ -350,6 +349,7 @@ ParseTreeNode *parse_factor() {
         return NULL;
     }
 
+  
     // Check for "(" <expression> ")"
     if (myTokens[current_token].type == TOKEN_LPAREN) {
         add_child(node, check_create_advance(TOKEN_LPAREN, "Left Parenthesis"));
@@ -376,10 +376,18 @@ ParseTreeNode *parse_factor() {
     else if (myTokens[current_token].type == TOKEN_NUMBER) {
         ParseTreeNode *constant = parse_constant();
         add_child(node, constant);
+
+        // if (myTokens[current_token].type == TOKEN_OPERATOR && strcmp(myTokens[current_token].value, "++") == 0) {
+        //     add_child(node, check_create_advance(TOKEN_OPERATOR, "Increment"));
+        // }
     }
     // Check for an identifier
     else if (myTokens[current_token].type == TOKEN_ID) {
         add_child(node, check_create_advance(TOKEN_ID, "Identifier"));
+
+        // if (myTokens[current_token].type == TOKEN_OPERATOR && strcmp(myTokens[current_token].value, "++") == 0) {
+        //     add_child(node, check_create_advance(TOKEN_OPERATOR, "Increment"));
+        // }
     }
     // Unexpected token
     else {
@@ -827,12 +835,10 @@ ParseTreeNode *parse_for_body() {
     return node;
 }
 
-// <it-assign-stmt> ::= [data-type] data-type “=” <expression> 
 ParseTreeNode *parse_it_assign_stmt(){
     ParseTreeNode *node = create_node("Iterative Assignment statement");
 
-    if(myTokens[current_token].type == TOKEN_DATATYPE)
-        add_child(node, parse_datatype());
+    add_child(node, parse_datatype());
 
     add_child(node, parse_identifier());
 
@@ -881,7 +887,7 @@ ParseTreeNode *input_statement() {
     return node;
 }
 
-// <increment> 
+
 ParseTreeNode *parse_increment() {
     ParseTreeNode *node = create_node("Increment");
 
@@ -898,7 +904,7 @@ ParseTreeNode *parse_increment() {
         ParseTreeNode *expression = parse_exp();
         add_child(node, expression);
     }
-    // <expression>("++" | "--")
+    // <expression>("++" | "--") 
     else{
         ParseTreeNode *expression = parse_exp();
         add_child(node, expression);
@@ -910,7 +916,7 @@ ParseTreeNode *parse_increment() {
 
     if (current_token >= token_length) {
         fprintf(stderr, "Error: Unexpected end of input\n");
-        return NULL;
+        return node;
     }
 
 

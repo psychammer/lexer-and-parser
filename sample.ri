@@ -8,6 +8,7 @@ if(age and height){
     score += 1;
     print(HEY + 5 + 2);
     print((x * y) / 2);
+
 }
 else if(age or height > 4){
     grade = 5 + 5;
@@ -18,6 +19,18 @@ else{
 
 fun sum(float a, char abby){
 
-    return (5 + 5)**2;
+    return (5 + 4)**2;
+}
 
+for(i = 0; i < 4; i++){
+    for(int j = 1; j < i; j++){
+
+    }
+}
+
+do{
+    print("hi");
+}
+while(i < 4){
+    return 5;
 }
