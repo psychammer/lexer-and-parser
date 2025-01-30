@@ -1014,7 +1014,7 @@ ParseTreeNode *create_dec_assign_node() {
 }
 
 // it-assign-stmt ------------------------------------------
-ParseTreeNode *create_dit_assign_node() {
+ParseTreeNode *create_it_assign_node() {
     return create_node("Iterative-assignment");
 }
 
