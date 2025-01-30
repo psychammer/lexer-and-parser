@@ -91,6 +91,7 @@ ParseTreeNode *parse_statement() {
         (myTokens[current_token].type != TOKEN_DO)
         ) 
         {
+                
         return NULL;
     }
 
@@ -131,7 +132,7 @@ ParseTreeNode *parse_statement() {
         add_child(node, input_statement);
         if(!input_statement){
             fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
+                myTokens[current_token-1].line);
             return NULL;
         }
         return node;
@@ -155,7 +156,7 @@ ParseTreeNode *parse_statement() {
             add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
         } else {
             fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
-                    myTokens[current_token].line);
+                    myTokens[current_token-1].line);
             return NULL;
         }    
 
@@ -169,7 +170,7 @@ ParseTreeNode *parse_statement() {
         add_child(node, return_statement);
         if(!return_statement){
             fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
+                myTokens[current_token-1].line);
             return NULL;
         }
 
@@ -186,7 +187,7 @@ ParseTreeNode *parse_statement() {
         add_child(node, input_statement);
         if(!input_statement){
             fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
+                myTokens[current_token-1].line);
             return NULL;
         }
         return node;
@@ -199,8 +200,8 @@ ParseTreeNode *parse_statement() {
         ParseTreeNode *declaration_stmt = parse_declaration_stmt();
         add_child(node, declaration_stmt);
         if(!declaration_stmt){
-            fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
+            fprintf(stderr, "Error: parsing declaration statement %d\n", 
+                myTokens[current_token-1].line);
             return NULL;
         }
         return node;
@@ -214,7 +215,7 @@ ParseTreeNode *parse_statement() {
         add_child(node, iterative);
         if(!iterative){
             fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
+                myTokens[current_token-1].line);
             return NULL;
         }
 
@@ -266,7 +267,7 @@ ParseTreeNode *parse_identifier() {
     if (myTokens[current_token].type == TOKEN_ID) {
         add_child(node, check_create_advance(TOKEN_ID, "IDENTIFIER"));
     } else {
-        fprintf(stderr, "Error: Expected data type at line %d\n", myTokens[current_token].line);
+        fprintf(stderr, "Error: Expected identifier at line %d\n", myTokens[current_token].line);
         return NULL;
     }
 
@@ -1072,7 +1073,7 @@ ParseTreeNode *parse_dec_assign(){
         add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
     } else {
         fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d current value is %s\n", 
-                myTokens[current_token].line, myTokens[current_token].value);
+                myTokens[current_token-1].line, myTokens[current_token].value);
         return NULL;
     }       
 
@@ -1152,7 +1153,7 @@ ParseTreeNode *parse_array(){
         add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
     } else {
         fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
-                myTokens[current_token].line);
+                myTokens[current_token-1].line);
         return NULL;
     }        
 
@@ -1175,7 +1176,7 @@ ParseTreeNode *parse_variable_stmt(){
         add_child(node, check_create_advance(TOKEN_SEMI, "Semicolon"));
     } else {
         fprintf(stderr, "Error: Expected semicolon at end of variable declaration at line %d\n", 
-                myTokens[current_token].line);
+                myTokens[current_token-1].line);
         return NULL;
     }     
 
@@ -1197,7 +1198,7 @@ ParseTreeNode *parse_declaration_stmt(){
         add_child(node, function_statement);
         if(!function_statement){
             fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
+                myTokens[current_token-1].line);
             return NULL;
         }
 
@@ -1210,7 +1211,7 @@ ParseTreeNode *parse_declaration_stmt(){
             add_child(node, variable_stmt);
             if(!variable_stmt){
                 fprintf(stderr, "Error: parsing output statement %d\n", 
-                    myTokens[current_token].line);
+                    myTokens[current_token-1].line);
                 return NULL;
             }
             return node;
@@ -1221,8 +1222,8 @@ ParseTreeNode *parse_declaration_stmt(){
         ParseTreeNode *dec_assign = parse_dec_assign();
         add_child(node, dec_assign);
         if(!dec_assign){
-            fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
+            fprintf(stderr, "Error: parsing Declaration assignment statement %d\n", 
+                myTokens[current_token-1].line);
             return NULL;
         }
         return node;
@@ -1234,7 +1235,7 @@ ParseTreeNode *parse_declaration_stmt(){
         add_child(node, array);
         if(!array){
             fprintf(stderr, "Error: parsing output statement %d\n", 
-                myTokens[current_token].line);
+                myTokens[current_token-1].line);
             return NULL;
         }
         return node;
@@ -1560,13 +1561,11 @@ ParseTreeNode *check_create_advance(TokenType type, const char* node_name) {
 void recover() {
     panic_mode = true;
     while (current_token < token_length) {
-
-        // checkpoint to be deleted
-        if (myTokens[current_token].type == TOKEN_SEMI){
-            current_token++;            
-            return;
-        }
-
+        // // checkpoint to be deleted
+        // if (myTokens[current_token].type == TOKEN_SEMI){
+        //     current_token++;            
+        //     return;
+        // }
         // Synchronize on statement/declaration boundaries
         if (myTokens[current_token].type == TOKEN_SEMI ||
             myTokens[current_token].type == TOKEN_RBRACE ||
@@ -1574,7 +1573,8 @@ void recover() {
             myTokens[current_token].type == TOKEN_FOR ||
             myTokens[current_token].type == TOKEN_WHILE ||
             myTokens[current_token].type == TOKEN_IF ||
-            myTokens[current_token].type == TOKEN_ELSE
+            myTokens[current_token].type == TOKEN_ELSE ||
+            myTokens[current_token].type == TOKEN_DATATYPE
             ) {
                 
             // checkpoint to be deleted
