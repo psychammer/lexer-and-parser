@@ -1,0 +1,77 @@
+Int Calculate = b * 2 / 18 % c // d
+a+= 1;
+b -= 2;
+c *= 3;
+d /= 4;
+e %= 5;
+
+if (a == 5 and b == 5) { 
+return true; 
+} 
+
+if(a == 5 or b == 5) { 
+return true;  
+} 
+if( a != 4 and b != 3) { 
+return true; 
+} 
+if(a < b) { 
+return true; 
+} 
+if(a <= b) { 
+return true; 
+} 
+if(a > b) { 
+return true; 
+} 
+if(a >= b) { 
+return true; 
+} 
+if (a != b) { 
+return true; 
+}
+if(a == b) { 
+return true; 
+}
+print(+a);
+print(-a); 
+a++; 
+a--;
+
+if
+else
+elseif
+while
+do
+function
+return
+try
+catch
+true
+false
+break
+
+# single comment
+/* multicomment */
+
+\s
+\n
+\t
+
+lambda
+in
+is
+finally
+raise
+del
+assert
+class
+import
+
+cycle
+break
+cease
+test
+end
+print
+else

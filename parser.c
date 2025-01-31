@@ -10,14 +10,14 @@
 char* getTokenType(int tokenTypeInt);
 token *myTokens;
 int current_token = 0;
+token *get_tokens(const char *filename) ;
+char *trim_whitespace(char *str);
 int token_length = 0;
 bool inside_body = false;
 bool panic_mode = false;
 
 FILE *output_file;
 
-token *get_tokens(const char *filename) ;
-char *trim_whitespace(char *str);
 
 int main() {
     myTokens = get_tokens("output.txt");
@@ -29,9 +29,9 @@ int main() {
     }
 
     if (current_token == 0) { // Print header once
-        printf("----------------------------------------\n");
-        printf("| Token Type       | Value   | Line No. |\n");
-        printf("----------------------------------------\n");
+        printf("            -----------------------------------------------------\n");
+        printf("            | Token Type      | Value                | Line No.  |\n");
+        printf("            -----------------------------------------------------\n");
     }
     
     AST *root = parse_program();
@@ -41,7 +41,7 @@ int main() {
         fclose(output_file);
         remove("parse_tree_diagrams.ebnf");
     } else {
-        printf("Parsing successful\n");
+        printf("\nParsing successful\n");
         print_parse_tree(root, 0);
         fclose(output_file);
     }
@@ -56,11 +56,11 @@ int main() {
 
 // <program> ::= { <declaration> }
 AST *parse_program() {
-    AST *node = create_program_node();
+    AST *node = create_node("Program");
     while (current_token < token_length && myTokens[current_token].type != TOKEN_EOF) {
         AST *statements = parse_statements();
         if(current_token+1 == token_length){
-            break;
+            node;
         }
         if (statements == NULL) {
             recover();
@@ -73,7 +73,7 @@ AST *parse_program() {
 
 AST *parse_statements()
 {   
-    AST *node = create_statements_node();
+    AST *node = create_node("Statements");
     
     // CHECKPOINT TO DELETE TOKEN_RBRACE
     while (current_token < token_length && myTokens[current_token].type != TOKEN_EOF && myTokens[current_token].type != TOKEN_RBRACE) {
@@ -99,7 +99,7 @@ AST *parse_statements()
 }
 
 AST *parse_statement() {
-    AST *node = create_statement_node();
+    AST *node = create_node("Statement");
 
     // Return NULL if not a valid declaration start
     if (current_token >= token_length || 
@@ -110,7 +110,8 @@ AST *parse_statement() {
         (myTokens[current_token].type != TOKEN_DATATYPE) &&
         (myTokens[current_token].type != TOKEN_FOR) &&
         (myTokens[current_token].type != TOKEN_WHILE) &&
-        (myTokens[current_token].type != TOKEN_DO)
+        (myTokens[current_token].type != TOKEN_DO) &&
+        (myTokens[current_token].type != TOKEN_NOISE)
         ) 
         {
                 
@@ -120,7 +121,7 @@ AST *parse_statement() {
     // TOKEN IF
     if (current_token + 1 < token_length && 
         myTokens[current_token].type == TOKEN_IF){
-
+        
         AST *conditional = parse_conditional();
         add_child(node, conditional);
         if(!conditional){
@@ -249,7 +250,7 @@ AST *parse_statement() {
 
 
 AST *parse_assignment() {
-    AST *node = create_assignment_node();
+    AST *node = create_node("Assignment");
 
     // Parse first identifier
     AST *identifier_node = parse_identifier();
@@ -264,7 +265,6 @@ AST *parse_assignment() {
                                             myTokens[current_token].value[0] == '*' ||
                                             myTokens[current_token].value[0] == '/'))
                                             {
-                                                printf("here?");
                                                 add_child(node, (check_create_advance(TOKEN_OPERATOR, "Assignment op")));
                                             }
         
@@ -284,7 +284,7 @@ AST *parse_assignment() {
 
 // <identifier> ::= identifier token
 AST *parse_identifier() {
-    AST *node = create_identifier_node();
+    AST *node = create_node("Identifier");
 
     if (myTokens[current_token].type == TOKEN_ID) {
         add_child(node, check_create_advance(TOKEN_ID, "IDENTIFIER"));
@@ -297,7 +297,7 @@ AST *parse_identifier() {
 }
 
 AST *parse_exp() {
-    AST *node = create_exp_node();
+    AST *node = create_node("Expression");
 
     // Parse the first term
     AST *term_node = parse_term();
@@ -330,7 +330,7 @@ AST *parse_exp() {
 
 
 AST *parse_term() {
-    AST *node = create_term_node();
+    AST *node = create_node("Term");
 
     // Parse the first factor
     AST *power_node = parse_power();
@@ -363,7 +363,7 @@ AST *parse_term() {
 }
 
 AST *parse_power() {
-    AST *node = create_power_node();
+    AST *node = create_node("Power");
 
     // Parse the first factor
     AST *factor_node = parse_factor();
@@ -394,7 +394,7 @@ AST *parse_power() {
 }
 
 AST *parse_factor() {
-    AST *node = create_factor_node();
+    AST *node = create_node("Factor");
 
     if (current_token >= token_length) {
         // fprintf(stderr, "Error: Unexpected end of input at Line: %d\n", myTokens[current_token].line);
@@ -425,13 +425,32 @@ AST *parse_factor() {
     }
     // Check for a number
     else if (myTokens[current_token].type == TOKEN_NUMBER) {
-        AST *constant = parse_constant();
-        add_child(node, constant);
+        if((myTokens[current_token+1].value[0]=='+' && myTokens[current_token+1].value[1]=='+') || (myTokens[current_token+1].value[0]=='-' || myTokens[current_token+1].value[1]=='-'))
+        {
+            AST *unary = parse_unary();
+            add_child(node, unary);
+        }
+        else{
+            AST *constant = parse_constant();
+            add_child(node, constant);
+        }
     }
     // Check for an identifier
     else if (myTokens[current_token].type == TOKEN_ID) {
-        add_child(node, check_create_advance(TOKEN_ID, "Identifier"));
+        if((myTokens[current_token+1].value[0]=='+' && myTokens[current_token+1].value[1]=='+') || (myTokens[current_token+1].value[0]=='-' || myTokens[current_token+1].value[1]=='-'))
+        {
+            AST *unary = parse_unary();
+            add_child(node, unary);
+        }
+        else{
+            add_child(node, parse_identifier());
+        }
     }
+    else if (myTokens[current_token].type == TOKEN_BOOL){
+        add_child(node, check_create_advance(TOKEN_BOOL, "Bool"));
+    }
+    else if(myTokens[current_token].value[0]=='+' || myTokens[current_token].value[0]=='-' || myTokens[current_token].value[0]=='!')
+        add_child(node, parse_unary());
     // Unexpected token
     else {
         fprintf(stderr, "Error: Unexpected token '%s' at Line: %d\n", 
@@ -442,10 +461,33 @@ AST *parse_factor() {
     return node;
 }
 
+AST *parse_unary() {
+    AST *node = create_node("Unary");
+
+    if(myTokens[current_token].type==TOKEN_OPERATOR){
+        add_child(node, check_create_advance(TOKEN_OPERATOR, "Unary Operator"));
+
+        add_child(node, parse_factor());
+    }
+
+    else if((myTokens[current_token+1].value[0]=='+' && myTokens[current_token+1].value[1]=='+') || (myTokens[current_token+1].value[0]=='-' || myTokens[current_token+1].value[1]=='-'))
+    {
+        if(myTokens[current_token].type==TOKEN_NUMBER){
+            add_child(node, parse_constant());
+        }
+        if(myTokens[current_token].type==TOKEN_ID){
+            add_child(node, parse_identifier());
+        }
+        add_child(node, check_create_advance(TOKEN_OPERATOR, "Unary Operator"));
+    }
+
+    return node;
+}
+
 
 // conditional statement
 AST *parse_conditional() {
-    AST *node = create_conditional_node();
+    AST *node = create_node("Conditional");
 
     // expect if token
     add_child(node, (check_create_advance(TOKEN_IF, "If")));
@@ -461,11 +503,8 @@ AST *parse_conditional() {
         myTokens[current_token-1].line);
         return NULL;
     }
-
     // expect a right parenthesis
     add_child(node, (check_create_advance(TOKEN_RPAREN, "Right parenthesis")));
-
-
 
     AST *if_body = parse_body();
     add_child(node, if_body);
@@ -477,7 +516,6 @@ AST *parse_conditional() {
     }
 
     while (current_token < token_length && myTokens[current_token].type == TOKEN_ELSE) {
-        printf("here?\n");
         AST *else_body = parse_else();
         add_child(node, else_body);
         if(!else_body){
@@ -504,7 +542,7 @@ AST *parse_conditional() {
 }
 
 AST *parse_else(){
-    AST *node = create_else_node();
+    AST *node = create_node("Else");
     add_child(node, check_create_advance(TOKEN_ELSE, "Else"));
 
     if (current_token < token_length && myTokens[current_token].type == TOKEN_IF) {
@@ -533,7 +571,7 @@ AST *parse_else(){
 // <bool-expression>
 AST *parse_bool_expression()
 {
-    AST  *node = create_bool_expression_node();
+    AST  *node = create_node("Bool Expression");
 
     // Parse the first factor
     AST *bool_term_node = parse_bool_term();
@@ -566,7 +604,7 @@ AST *parse_bool_expression()
 // <bool-term>
 AST *parse_bool_term()
 {
-    AST  *node = create_bool_term_node();
+    AST  *node = create_node("Bool Term");
 
     // Parse the first factor
     AST *bool_factor_node = parse_bool_factor();
@@ -599,7 +637,8 @@ AST *parse_bool_term()
 // <bool-factor>
 AST *parse_bool_factor()
 {
-    AST  *node = create_bool_factor_node();
+    AST  *node = create_node("Bool Factor");
+
 
     if (current_token >= token_length) {
         // fprintf(stderr, "Error: Unexpected end of input at Line: %d\n", myTokens[current_token].line);
@@ -640,6 +679,7 @@ AST *parse_bool_factor()
         strcmp(myTokens[current_token+1].value, ">=")==0 ||
         strcmp(myTokens[current_token+1].value, "<=")==0)
         ) {
+
         AST *rel_expression = parse_rel_expression();    
         add_child(node, rel_expression);
     }
@@ -664,7 +704,7 @@ AST *parse_bool_factor()
 
 AST *parse_rel_expression()
 {
-    AST *node = create_rel_expression_node();
+    AST *node = create_node("Relational Expression");
     
     // Parse first expression
     AST *left_expr_node = parse_exp();
@@ -700,8 +740,7 @@ AST *parse_rel_expression()
 //Output statement  [ADDED]
 // Parse print statement: "print" "(" <print-expression> ")" ";"
 AST *parse_output_statement() {
-    AST *node = create_output_statement_node();
-    
+    AST *node = create_node("Output Statement");
     // Expect "print" keyword
     if (current_token < token_length && myTokens[current_token].type == TOKEN_NOISE) {
         add_child(node, check_create_advance(TOKEN_NOISE, "Print"));
@@ -789,7 +828,7 @@ AST *parse_print_expression() {
 
 
 AST *parse_return_statement() {
-    AST *node = create_return_statement_node();
+    AST *node = create_node("Return Statement");
 
     // Expect "return" keyword
     if (current_token < token_length && myTokens[current_token].type == TOKEN_RETURN) {
@@ -809,7 +848,7 @@ AST *parse_return_statement() {
 }
 
 AST *parse_function_statement() {
-    AST *node = create_function_statement_node();
+    AST *node = create_node("Function Statement");
 
     if(myTokens[current_token].type == TOKEN_FUNCTION){
         // expect a function
@@ -896,10 +935,9 @@ AST *parse_for_body() {
     add_child(node, check_create_advance(TOKEN_SEMI, ";"));
 
     add_child(node, parse_increment());
-   
-    add_child(node, check_create_advance(TOKEN_RPAREN, ")"));
-   
+      
     add_child(node, parse_body());
+
 
     return node;
 }
@@ -1019,7 +1057,6 @@ AST *parse_input_statement() {
 
     return node;
 }
-
 
 AST *parse_type_cast() {
         AST *node = create_node("Type Cast");
@@ -1288,11 +1325,11 @@ AST *parse_increment() {
         add_child(node, expression);
     }
     // <expression>("++" | "--")
-    else{
+    else{;
         AST *expression = parse_exp();
         add_child(node, expression);
 
-        add_child(node, check_create_advance(TOKEN_OPERATOR, "Increment operator"));
+        add_child(node, check_create_advance(TOKEN_RPAREN, "Right Parenthesis"));
     }
     
 
@@ -1309,7 +1346,7 @@ AST *parse_increment() {
 
 AST *parse_function_call()
 {
-    AST *node = create_function_call_node();
+    AST *node = create_node("Function Call");
 
     // Expect identifier
     AST *identifier = parse_identifier();
@@ -1335,7 +1372,7 @@ AST *parse_function_call()
 }
 
 AST *parse_parameter_list() {
-    AST *node = create_parameter_list_node();
+    AST *node = create_node("Parameter List");
 
     
     if (current_token < token_length && myTokens[current_token].type == TOKEN_RPAREN) {
@@ -1373,7 +1410,7 @@ AST *parse_parameter_list() {
 }
 
 AST *parse_datatype() {
-    AST *node = create_datatype_node();
+    AST *node = create_node("Data Type");
     if (current_token < token_length) {
         if (myTokens[current_token].value[0] == 'i') {
             add_child(node, check_create_advance(TOKEN_DATATYPE, "Int"));
@@ -1393,11 +1430,11 @@ AST *parse_datatype() {
 
 // checkpoint to check for errors
 AST *parse_body(){
-    inside_body = true;
-    AST *node = create_body_node();
+    AST *node = create_node("Body");
     add_child(node, check_create_advance(TOKEN_LBRACE, "Left Brace"));
 
-    while (current_token < token_length && myTokens[current_token].type != TOKEN_RBRACE) {
+
+    while (current_token < token_length && myTokens[current_token].type != TOKEN_RBRACE && current_token+1!=token_length) {
         AST *statements = parse_statements();
         if (statements != NULL) {
             add_child(node, statements);
@@ -1424,7 +1461,7 @@ AST *parse_body(){
 
 
 AST *parse_constant(){
-    AST *node = create_constant_node();
+    AST *node = create_node("Constant");
     
     if(myTokens[current_token].type==TOKEN_STRING){
         add_child(node, check_create_advance(TOKEN_STRING, "String"));
@@ -1432,128 +1469,22 @@ AST *parse_constant(){
     else if(myTokens[current_token].type==TOKEN_NUMBER){
         add_child(node, check_create_advance(TOKEN_NUMBER, "Number"));
     }
+    else if(myTokens[current_token].type==TOKEN_BOOL){
+        add_child(node, check_create_advance(TOKEN_BOOL, "Bool"));
+    }
 
     return node;
 }
 
 
-
-// Implement create functions for each non-terminal
-AST *create_program_node() {
-    return create_node("Program");
-}
-
-AST *create_statements_node() {
-    return create_node("Statements");
-}
-
-AST *create_statement_node() {
-    return create_node("Statement");
-}
-
-AST *create_assignment_node() {
-    return create_node("Assignment");
-}
-
-AST *create_identifier_node() {
-    return create_node("Identifier");
-}
-
-AST *create_exp_node() {
-    return create_node("Expression");
-}
-
-AST *create_term_node() {
-    return create_node("Term");
-}
-
-AST *create_power_node() {
-    return create_node("Power");
-}
-
-AST *create_factor_node() {
-    return create_node("Factor");
-}
-
-AST *create_conditional_node() {
-    return create_node("Conditional");
-}
-
-AST *create_bool_expression_node() {
-    return create_node("Bool Expression");
-}
-
-AST *create_bool_term_node() {
-    return create_node("Bool Term");
-}
-
-AST *create_bool_factor_node() {
-    return create_node("Bool Factor");
-}
-
-AST *create_body_node() {
-    return create_node("Body");
-}
-
-AST *create_output_statement_node() {
-    return create_node("Output");
-}
-
-AST *create_parse_print_expression_node()
-{
-    return create_node("Print");
-}
-
-AST *create_return_statement_node()
-{
-    return create_node("Return");
-}
-
-AST *create_else_node()
-{
-    return create_node("Else");
-}
-
-AST *create_function_statement_node()
-{
-    return create_node("Function");
-}
-
-AST *create_parameter_list_node()
-{
-    return create_node("Parameter list");
-}
-
-AST *create_datatype_node()
-{
-    return create_node("Datatype");
-}
-
-AST *create_rel_expression_node()
-{
-    return create_node("Relational Expression");
-}
-
-AST *create_constant_node()
-{
-    return create_node("Constant");
-}
-
-AST * create_function_call_node()
-{
-    return create_node("Function Call");
-}
-
 // Function to allocate and initialize a new AST
 AST *create_node(const char *name) {
     AST *node = malloc(sizeof(AST));
     if (!node) {
-        fprintf(stderr, "Error: Memory allocation failed in create_node\n");
         recover();
     }
     node->name = strdup(name);
     if (!node->name) {
-        fprintf(stderr, "Error: Memory allocation failed in create_node\n");
         recover();
     }
     node->token = NULL;
@@ -1564,11 +1495,10 @@ AST *create_node(const char *name) {
 
 // Helper function to match the current token with the expected type and create a node for it
 AST *check_create_advance(TokenType type, const char* node_name) {
-    printf("| %-15s | %-7s | %-7d |\n", getTokenType(myTokens[current_token].type), myTokens[current_token].value, myTokens[current_token].line);
+    printf("parsing:    | %-15s | %-20s | %-7d |\n", getTokenType(myTokens[current_token].type), myTokens[current_token].value, myTokens[current_token].line);
     AST *node = create_node(node_name);
     node->token = malloc(sizeof(token));
     if (!node->token) {
-        fprintf(stderr, "Error: Memory allocation failed in match_and_create_node\n");
         recover();
     }
     *node->token = myTokens[current_token];
@@ -1579,6 +1509,7 @@ AST *check_create_advance(TokenType type, const char* node_name) {
         printf("Unexpected token %s at line %d \n", getTokenType(myTokens[current_token].type), myTokens[current_token].line);
         recover();
     }
+
     return node;
 }
 
@@ -1605,7 +1536,6 @@ void recover() {
             myTokens[current_token].type == TOKEN_DATATYPE ||
             strcmp(myTokens[current_token].value, "fun")==0
             ) {
-            
             // checkpoint to be deleted
             current_token++;
             return;
@@ -1633,6 +1563,7 @@ void print_parse_tree(AST *node, int tree_height) {
 
     print_indent(tree_height);
 
+
     // Terminal node
     if (node->token != NULL) {
         // Print constants
@@ -1642,7 +1573,9 @@ void print_parse_tree(AST *node, int tree_height) {
             node->token->type == TOKEN_OPERATOR ||
             node->token->type == TOKEN_DATATYPE) {
             
-            // Only have a single set of quotations for string literals
+              
+
+            // Only have a single set of quotations for string literals 
             if (node->token->type == TOKEN_STRING) {
                 fprintf(output_file, "%s: %s", 
                         getTokenType(node->token->type), 
@@ -1806,6 +1739,9 @@ token *get_tokens(const char *filename) {
 
         if (ptr != NULL) {
             token_list[token_length].type = atoi(ptr);
+            if (token_list[token_length].type == TOKEN_SINGLECOMMENT || token_list[token_length].type == TOKEN_MULTICOMMENT) {
+                continue;  // Skip comments
+            }
             ptr = strtok(NULL, "|");
         }
 
@@ -1818,10 +1754,6 @@ token *get_tokens(const char *filename) {
         if (ptr != NULL) {
             token_list[token_length].line = atoi(ptr);
         }
-
-        // printf("Token Code: %d\n", token_list[token_length].type);
-        // printf("Token Value: %s\n", token_list[token_length].value);
-        // printf("Token Line Number: %d\n\n", token_list[token_length].line);
 
         token_length++;
     }
