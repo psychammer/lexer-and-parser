@@ -117,6 +117,7 @@ int main(int argc, char *argv[]){
         case TOKEN_BREAK: return "TOKEN_BREAK"; break;
         case TOKEN_TRY: return "TOKEN_TRY"; break;
         case TOKEN_CATCH: return "TOKEN_CATCH"; break;
+        case TOKEN_NOISE: return "TOKEN_NOISE"; break;
 
 
         case 31: return "TOKEN_RESERVEDWORDS";break;

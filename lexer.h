@@ -419,7 +419,7 @@ token* get_identifier_token(lexer* myLexer){
                             break;
                         }
                         else{
-                            state=16; // no more keywords left, so maybe it's an id
+                            state=16; // if not c'h' try c'o'
                             break;
                         }
                     case 8: // check for ch'a'
@@ -543,7 +543,7 @@ token* get_identifier_token(lexer* myLexer){
                             break;
                         }
                         else{
-                            state=-1; // no more keywords left, so maybe it's an id
+                            state=-1; 
                             break;
                         }
                     
@@ -564,7 +564,7 @@ token* get_identifier_token(lexer* myLexer){
                             break;
                         }
                         else{
-                            state=-1; // no more keywords left, so maybe it's an id
+                            state=26; // if not c'l' try c'e'
                             break;
                         }
 
@@ -612,8 +612,103 @@ token* get_identifier_token(lexer* myLexer){
                             break;
                         }
                         
-
-
+                    case 26: // check for c'e'
+                        if(myLexer->current_char=='e'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=27; // now check for ce'a'
+                            break;
+                        }
+                        else{
+                            state=31; // check for c'y'
+                            break;
+                        }
+                    case 27:
+                        if(myLexer->current_char=='a'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=28; // now check for cea's'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 28:
+                        if(myLexer->current_char=='s'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=29; // now check for ceas'e'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 29:
+                        if(myLexer->current_char=='e'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=30; // now check if there is cease only
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 30:
+                        if(isalnum(myLexer->current_char)==0 && myLexer->current_char!='_'){
+                            return token_init(TOKEN_NOISE, myToken->value);
+                        }
+                        else{
+                            state=-1; // more characters ahead, so maybe it's an id
+                            break;
+                        }
+                    
+                    case 31:
+                        if(myLexer->current_char=='y'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=32; // now check for cy'c'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 32:
+                        if(myLexer->current_char=='c'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=33; // now check for cyc'l'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 33:
+                        if(myLexer->current_char=='l'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=34; // now check for cycl'e'
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 34:
+                        if(myLexer->current_char=='e'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=35; // now check if there is cycle only
+                            break;
+                        }
+                        else{
+                            state=-1; // no more keywords left, so maybe it's an id
+                            break;
+                        }
+                    case 35:
+                        if(isalnum(myLexer->current_char)==0 && myLexer->current_char!='_'){
+                            return token_init(TOKEN_NOISE, myToken->value);
+                        }
+                        else{
+                            state=-1; // more characters ahead, so maybe it's an id
+                            break;
+                        }
                     default:
                         break;
                 }
@@ -809,15 +904,18 @@ token* get_identifier_token(lexer* myLexer){
                     case 7: // check for en'd'
                         if(myLexer->current_char=='d'){
                             realloc_token_value_then_advance(myToken, myLexer);
-                            state=8; // now check for end'l'
+                            state=8; // now check for end, end'l'  
                             break;
                         }
                         else{
-                            state=-1; // no more keywords left, so maybe it's an id
+                            state=-1; // check if there is end
                             break;
                         } 
-                    case 8: // check for end'l'
-                        if(myLexer->current_char=='l'){
+                    case 8: // check for end only
+                        if(isalnum(myLexer->current_char)==0 && myLexer->current_char!='_'){
+                            return token_init(TOKEN_NOISE, myToken->value);
+                        }
+                        else if(myLexer->current_char=='l'){ // check for end'l'
                             realloc_token_value_then_advance(myToken, myLexer);
                             state=9; // now check for endl'o'
                             break;
@@ -1699,8 +1797,11 @@ token* get_identifier_token(lexer* myLexer){
                             state=-1; 
                             break;
                         }
-                    case 4: // check for print'o'
-                        if(myLexer->current_char=='o'){
+                    case 4: // check for print, print'o'
+                        if(isalnum(myLexer->current_char)==0 && myLexer->current_char!='_'){
+                            return token_init(TOKEN_NOISE, myToken->value);
+                        }
+                        else if(myLexer->current_char=='o'){
                             realloc_token_value_then_advance(myToken, myLexer);
                             state=5; // now check if it still has remaining charac
                             break;
@@ -2087,10 +2188,15 @@ token* get_identifier_token(lexer* myLexer){
                             state=-1; // if not l'e', try l'a'
                             break;
                         } 
-                    case 7: // check for te'r' 
+                    case 7: // check for te'r', te's' 
                         if(myLexer->current_char=='r'){
                             realloc_token_value_then_advance(myToken, myLexer);
                             state=8; // now check if it still has remaining charac
+                            break;
+                        }
+                        else if(myLexer->current_char=='s'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=19; // now check if it still has remaining charac
                             break;
                         }
                         else{
@@ -2198,6 +2304,24 @@ token* get_identifier_token(lexer* myLexer){
                     case 18: // check for terminateall only
                         if(isalnum(myLexer->current_char)==0 && myLexer->current_char!='_'){
                             return token_init(TOKEN_TERMINATEALL, myToken->value);
+                        }
+                        else{
+                            state=-1; 
+                            break;
+                        }
+                    case 19: // check for tes't'
+                        if(myLexer->current_char=='t'){
+                            realloc_token_value_then_advance(myToken, myLexer);
+                            state=20; // now check if test only
+                            break;
+                        }
+                        else{
+                            state=-1; 
+                            break;
+                        }
+                    case 20: // check for test
+                        if(isalnum(myLexer->current_char)==0 && myLexer->current_char!='_'){
+                            return token_init(TOKEN_NOISE, myToken->value);
                         }
                         else{
                             state=-1; 

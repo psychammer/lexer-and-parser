@@ -7,3 +7,47 @@ score + 1;
 result = (x + 2) * z / (y ** 2 - ;
 
 fun greetUser() {print("Hello user, welcome!"  }
+
+if height == 2.1 { print("tall"); }
+
+if (height => 2.1) {print("tall"); } else {print("short");} 
+
+if (height >= 2.1) { print("tall"); }
+         else if (height =<  1.65) { print("short"); }
+         else print("average");
+
+for int i = 0; i < 5; i++ {
+    print(i);
+}
+
+while x > 0 {
+    print(x);
+    x - 1;
+}
+
+do {
+    myNumber /= ;
+}
+while myNumber > 0;
+
+int score == 10;
+
+int result = 5 + ;
+
+int fun add(int a, int b) return a + b;
+
+int number[5];
+
+if (height = 2.1) { print("tall"); }
+
+if (height >== 2.1) { print("tall"); } else print("short") 
+
+name = input "Enter your name: ";
+
+age = input(Enter your age: ); 
+
+city = input("Enter your city: " 
+
+if (height >= 2.1) { print("tall") }
+else if (height <= 1.65) print("short");
+else { print(average); }

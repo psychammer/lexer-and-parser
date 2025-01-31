@@ -67,7 +67,7 @@ typedef enum {
     TOKEN_TERMINATEALL,
     TOKEN_CONST,
     TOKEN_BLANK,
-    
+    TOKEN_NOISE
 
 }TokenType;
 
